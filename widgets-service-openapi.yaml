@@ -1,0 +1,192 @@
+openapi: 3.0.0
+info:
+  title: Widgets Service
+  description: |
+    Widgets Service
+  contact:
+    email: dagher.mustafa@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: localhost:8080
+tags:
+- name: widget
+  description: Everything about your Widgets
+paths:
+  /widgets:
+    get:
+      tags:
+      - widget
+      summary: Get all widgets
+      description: Returns an array of widgets
+      operationId: getAllWidgets
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Widget'
+    post:
+      tags:
+      - widget
+      summary: Add a new widget
+      operationId: addWidget
+      requestBody:
+        $ref: '#/components/requestBodies/Widget'
+      responses:
+        "201":
+          description: Widget Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Widget'
+        "405":
+          description: Invalid input
+  /widgets/{widgetId}:
+    get:
+      tags:
+      - widget
+      summary: Find widget by ID
+      description: Returns a single widget
+      operationId: getWidgetById
+      parameters:
+      - name: widgetId
+        in: path
+        description: ID of widget to return
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Widget'
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Widget not found
+    put:
+      tags:
+      - widget
+      summary: Updates a widget in the store with form data
+      operationId: updateWidgetWithForm
+      parameters:
+      - name: widgetId
+        in: path
+        description: ID of widget that needs to be updated
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        $ref: '#/components/requestBodies/Widget'
+      responses:
+        "201":
+          description: Widget Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Widget'
+        "405":
+          description: Invalid input
+    delete:
+      tags:
+      - widget
+      summary: Deletes a widget
+      operationId: deleteWidget
+      parameters:
+      - name: widgetId
+        in: path
+        description: Widget id to delete
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Widget not found
+components:
+  schemas:
+    Widget:
+      required:
+      - height
+      - width
+      - x
+      - "y"
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        x:
+          type: integer
+          format: int64
+        y:
+          type: integer
+          format: int64
+        z:
+          type: integer
+          format: int64
+        width:
+          minimum: 0
+          exclusiveMinimum: true
+          type: number
+          format: float
+        height:
+          minimum: 0
+          exclusiveMinimum: true
+          type: number
+        lastModificationDate:
+          type: string
+          format: date-time
+    WidgetRequest:
+      required:
+      - height
+      - width
+      - x
+      - "y"
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int64
+        y:
+          type: integer
+          format: int64
+        z:
+          type: integer
+          format: int64
+        width:
+          minimum: 0
+          exclusiveMinimum: true
+          type: number
+          format: float
+        height:
+          minimum: 0
+          exclusiveMinimum: true
+          type: number
+          format: float
+  requestBodies:
+    Widget:
+      description: Widget object that needs to be added
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WidgetRequest'
+      required: true
