@@ -28,7 +28,7 @@ public class Widget {
     private Float width;
 
     @JsonProperty("height")
-    private BigDecimal height;
+    private Float height;
 
     @JsonProperty("lastModificationDate")
     private OffsetDateTime lastModificationDate;
@@ -108,7 +108,7 @@ public class Widget {
         this.width = width;
     }
 
-    public Widget height(BigDecimal height) {
+    public Widget height(Float height) {
         this.height = height;
         return this;
     }
@@ -117,11 +117,11 @@ public class Widget {
     @NotNull
     @Valid
     @DecimalMin(value = "0", inclusive = false)
-    public BigDecimal getHeight() {
+    public Float getHeight() {
         return height;
     }
 
-    public void setHeight(BigDecimal height) {
+    public void setHeight(Float height) {
         this.height = height;
     }
 

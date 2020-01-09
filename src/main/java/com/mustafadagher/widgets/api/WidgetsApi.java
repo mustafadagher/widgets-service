@@ -35,19 +35,8 @@ public interface WidgetsApi {
     @PostMapping(value = "/widgets",
             produces = {"application/json"},
             consumes = {"application/json"})
-    default ResponseEntity<Widget> addWidget(@ApiParam(value = "Widget object that needs to be added", required = true) @Valid @RequestBody WidgetRequest widgetRequest) {
-        getRequest().ifPresent(request -> {
-            for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
-                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                    String exampleString = "{ \"lastModificationDate\" : \"2000-01-23T04:56:07.000+00:00\", \"x\" : 0, \"width\" : 0.5962134, \"y\" : 6, \"z\" : 1, \"id\" : \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"height\" : 0.5637376656633328 }";
-                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
-                    break;
-                }
-            }
-        });
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-
-    }
+    @ResponseStatus(HttpStatus.CREATED)
+    Widget addWidget(@ApiParam(value = "Widget object that needs to be added", required = true) @Valid @RequestBody WidgetRequest widgetRequest);
 
 
     @ApiOperation(value = "Deletes a widget", nickname = "deleteWidget", tags = {"widget",})

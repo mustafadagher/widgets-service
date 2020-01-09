@@ -152,6 +152,7 @@ components:
           minimum: 0
           exclusiveMinimum: true
           type: number
+          format: float
         lastModificationDate:
           type: string
           format: date-time
