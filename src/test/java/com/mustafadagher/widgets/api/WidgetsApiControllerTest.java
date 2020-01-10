@@ -58,6 +58,27 @@ class WidgetsApiControllerTest {
     }
 
     @Test
+    void testWidgetWidthAndHeightMustBeGreaterThanZero() throws Exception {
+        // Given invalid widgetRequest (all required values are nulls)
+        WidgetRequest widgetRequest = aValidWidgetRequest();
+        widgetRequest.setHeight(0f);
+        widgetRequest.setWidth(0f);
+
+        // When
+        ResultActions result = mockMvc
+                .perform(
+                        post("/widgets")
+                                .content(objectMapper.writeValueAsString(widgetRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
+
+        // then
+        result
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors", hasItems("height must be greater than 0", "width must be greater than 0")));
+    }
+
+    @Test
     void testCreateWidgetWillReturnsCompleteWidgetDescription() throws Exception {
         // Given
         WidgetRequest widgetRequest = aValidWidgetRequest();
