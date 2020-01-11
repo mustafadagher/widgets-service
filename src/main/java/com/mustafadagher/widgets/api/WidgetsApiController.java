@@ -2,8 +2,8 @@ package com.mustafadagher.widgets.api;
 
 import com.mustafadagher.widgets.model.Widget;
 import com.mustafadagher.widgets.model.WidgetRequest;
+import com.mustafadagher.widgets.service.WidgetsService;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -16,9 +16,11 @@ import java.util.UUID;
 @RequestMapping("${openapi.widgetsService.base-path:}")
 public class WidgetsApiController implements WidgetsApi {
 
+    private final WidgetsService widgetsService;
     private final NativeWebRequest request;
 
-    public WidgetsApiController(NativeWebRequest request) {
+    public WidgetsApiController(WidgetsService widgetsService, NativeWebRequest request) {
+        this.widgetsService = widgetsService;
         this.request = request;
     }
 
@@ -28,14 +30,7 @@ public class WidgetsApiController implements WidgetsApi {
     }
 
     public Widget addWidget(@Valid WidgetRequest widgetRequest) {
-        return new Widget()
-                .id(UUID.randomUUID())
-                .lastModificationDate(OffsetDateTime.now())
-                .x(widgetRequest.getX())
-                .y(widgetRequest.getY())
-                .z(widgetRequest.getZ())
-                .height(widgetRequest.getHeight())
-                .width(widgetRequest.getWidth());
+        return widgetsService.addWidget(widgetRequest);
     }
 
 }

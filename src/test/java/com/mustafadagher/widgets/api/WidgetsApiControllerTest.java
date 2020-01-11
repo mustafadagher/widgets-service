@@ -2,20 +2,21 @@ package com.mustafadagher.widgets.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mustafadagher.widgets.model.WidgetRequest;
-import org.hamcrest.core.Is;
+import com.mustafadagher.widgets.service.WidgetsService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ExtendWith(SpringExtension.class)
 class WidgetsApiControllerTest {
 
     @Autowired
@@ -33,9 +33,12 @@ class WidgetsApiControllerTest {
     @Autowired
     private WidgetsApiController widgetsApiController;
 
+    @SpyBean
+    private WidgetsService widgetsService;
+
     @Test
     void contextLoads() {
-        assertNotNull(widgetsApiController);
+        assertThat(widgetsApiController).isNotNull();
     }
 
     @Test
@@ -92,6 +95,8 @@ class WidgetsApiControllerTest {
                 ).andDo(print());
 
         // Then
+        verify(widgetsService).addWidget(widgetRequest);
+
         result.andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.lastModificationDate").exists())
@@ -100,12 +105,6 @@ class WidgetsApiControllerTest {
                 .andExpect(jsonPath("$.z", is(widgetRequest.getZ()), Long.class))
                 .andExpect(jsonPath("$.width", is(widgetRequest.getWidth()), Float.class))
                 .andExpect(jsonPath("$.height", is(widgetRequest.getHeight()), Float.class));
-    }
-
-    private WidgetRequest aValidWidgetRequest() {
-        return new WidgetRequest()
-                .height(1.5F).width(1.5F)
-                .x(0L).y(0L).z(-1L);
     }
 
 }

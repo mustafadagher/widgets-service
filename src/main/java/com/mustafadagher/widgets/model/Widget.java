@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -83,7 +82,7 @@ public class Widget {
         return this;
     }
 
-   @ApiModelProperty
+    @ApiModelProperty
     public Long getZ() {
         return z;
     }
@@ -167,18 +166,16 @@ public class Widget {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("class Widget {\n");
 
-        sb.append("    id: ").append(toIndentedString(id)).append("\n");
-        sb.append("    x: ").append(toIndentedString(x)).append("\n");
-        sb.append("    y: ").append(toIndentedString(y)).append("\n");
-        sb.append("    z: ").append(toIndentedString(z)).append("\n");
-        sb.append("    width: ").append(toIndentedString(width)).append("\n");
-        sb.append("    height: ").append(toIndentedString(height)).append("\n");
-        sb.append("    lastModificationDate: ").append(toIndentedString(lastModificationDate)).append("\n");
-        sb.append("}");
-        return sb.toString();
+        return "class Widget {\n" +
+                "    id: " + toIndentedString(id) + "\n" +
+                "    x: " + toIndentedString(x) + "\n" +
+                "    y: " + toIndentedString(y) + "\n" +
+                "    z: " + toIndentedString(z) + "\n" +
+                "    width: " + toIndentedString(width) + "\n" +
+                "    height: " + toIndentedString(height) + "\n" +
+                "    lastModificationDate: " + toIndentedString(lastModificationDate) + "\n" +
+                "}";
     }
 
     /**

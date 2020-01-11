@@ -45,7 +45,7 @@ public class WidgetRequest {
     }
 
 
-    @ApiModelProperty(required = true, value = "")
+    @ApiModelProperty(required = true)
     @NotNull
     public Long getY() {
         return y;
@@ -91,7 +91,7 @@ public class WidgetRequest {
         return this;
     }
 
-    @ApiModelProperty(required = true, value = "")
+    @ApiModelProperty(required = true)
     @NotNull
     @DecimalMin(value = "0", inclusive = false)
     public Float getHeight() {
@@ -126,16 +126,13 @@ public class WidgetRequest {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("class WidgetRequest {\n");
-
-        sb.append("    x: ").append(toIndentedString(x)).append("\n");
-        sb.append("    y: ").append(toIndentedString(y)).append("\n");
-        sb.append("    z: ").append(toIndentedString(z)).append("\n");
-        sb.append("    width: ").append(toIndentedString(width)).append("\n");
-        sb.append("    height: ").append(toIndentedString(height)).append("\n");
-        sb.append("}");
-        return sb.toString();
+        return "class WidgetRequest {\n" +
+                "    x: " + toIndentedString(x) + "\n" +
+                "    y: " + toIndentedString(y) + "\n" +
+                "    z: " + toIndentedString(z) + "\n" +
+                "    width: " + toIndentedString(width) + "\n" +
+                "    height: " + toIndentedString(height) + "\n" +
+                "}";
     }
 
     /**
