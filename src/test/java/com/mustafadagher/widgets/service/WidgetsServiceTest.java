@@ -50,4 +50,49 @@ class WidgetsServiceTest {
         assertThat(response.getWidth()).isEqualTo(aValidRequest.getWidth());
         assertThat(response.getHeight()).isEqualTo(aValidRequest.getHeight());
     }
+
+    @Test
+    void testIfZNotSpecifiedWidgetIsSentToForeground() {
+        //  Given
+        WidgetRequest aValidRequest = aValidWidgetRequest().z(null);
+        when(widgetRepository.save(any())).then(returnsFirstArg());
+        long highestZIndexValueBeforeInsert = widgetsService.getHighestZIndex().get();
+
+        // When
+        Widget response = widgetsService.addWidget(aValidRequest);
+
+        //  Then
+        verify(widgetRepository).save(response);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getLastModificationDate())
+                .isNotNull()
+                .isCloseToUtcNow(within(2, ChronoUnit.SECONDS));
+        assertThat(response.getZ()).isEqualTo(highestZIndexValueBeforeInsert + 1);
+    }
+
+    @Test
+    void testIfZNotSpecifiedWidgetIsSentToForegroundMultipleInserts() {
+        //  Given
+        WidgetRequest aValidRequest = aValidWidgetRequest();
+        when(widgetRepository.save(any())).then(returnsFirstArg());
+
+        // When
+        aValidRequest.setZ(1L);
+        widgetsService.addWidget(aValidRequest);
+
+        aValidRequest.setZ(2L);
+        widgetsService.addWidget(aValidRequest);
+
+        aValidRequest.setZ(3L);
+        widgetsService.addWidget(aValidRequest);
+
+        aValidRequest.setZ(null);
+        Widget response = widgetsService.addWidget(aValidRequest);
+
+        //  Then
+        assertThat(response.getZ()).isEqualTo(4);
+        assertThat(widgetsService.getHighestZIndex().get()).isEqualTo(response.getZ());
+    }
 }

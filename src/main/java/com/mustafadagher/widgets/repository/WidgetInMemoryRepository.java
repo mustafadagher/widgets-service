@@ -25,7 +25,6 @@ public class WidgetInMemoryRepository implements WidgetRepository {
     }
 
     private Function<UUID, Widget> updateWidgetDescriptionFn(Widget widget) {
-        // TODO handle Z if 0 or if equal to other value
         return i -> {
             if (storage.containsKey(i)) {
                 Widget old = storage.get(i);

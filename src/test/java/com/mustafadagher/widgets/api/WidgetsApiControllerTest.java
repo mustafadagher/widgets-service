@@ -3,6 +3,8 @@ package com.mustafadagher.widgets.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.service.WidgetsService;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.IsNot;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,8 +16,10 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -107,4 +111,27 @@ class WidgetsApiControllerTest {
                 .andExpect(jsonPath("$.height", is(widgetRequest.getHeight()), Float.class));
     }
 
+    @Test
+    void testZIndexIsSetIfLeftNotSpecifiedInRequest() throws Exception {
+        // Given
+        WidgetRequest widgetRequestWithNoZ = aValidWidgetRequest().z(null);
+
+        // When
+        ResultActions result = mockMvc
+                .perform(
+                        post("/widgets")
+                                .content(objectMapper.writeValueAsString(widgetRequestWithNoZ))
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
+
+        // Then
+        verify(widgetsService).addWidget(widgetRequestWithNoZ);
+
+        result.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.lastModificationDate").exists())
+                .andExpect(jsonPath("$.z").exists())
+                .andExpect(jsonPath("$.z", matchesRegex("^-?\\d{1,19}$"), String.class))
+                .andExpect(jsonPath("$.z", IsNot.not(widgetRequestWithNoZ.getZ()), Long.class));
+    }
 }
