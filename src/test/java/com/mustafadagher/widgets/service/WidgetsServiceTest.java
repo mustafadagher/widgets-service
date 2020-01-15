@@ -5,19 +5,24 @@ import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.repository.WidgetRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Array;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 
+import static com.mustafadagher.widgets.Mocks.aValidWidget;
 import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WidgetsServiceTest {
@@ -26,6 +31,9 @@ class WidgetsServiceTest {
     private WidgetsService widgetsService;
     @Mock
     private WidgetRepository widgetRepository;
+
+    @Captor
+    private ArgumentCaptor<Widget> argumentCaptor;
 
     @Test
     void testAddWidgetReturnsFullWidgetDescription() {
@@ -77,8 +85,43 @@ class WidgetsServiceTest {
         //  Given
         WidgetRequest aValidRequest = aValidWidgetRequest();
         when(widgetRepository.save(any())).then(returnsFirstArg());
+        insertThreeWidgetsWithZIndexOneTwoAndThree(aValidRequest);
 
         // When
+        aValidRequest.setZ(null);
+        Widget response = widgetsService.addWidget(aValidRequest);
+
+        //  Then
+        assertThat(response.getZ()).isEqualTo(4);
+        assertThat(widgetsService.getHighestZIndex().get()).isEqualTo(response.getZ());
+    }
+
+    @Test
+    void testWidgetWithSpecifiedIndexPushesAllWidgetsWithEqualOrHigherIndexesUpwards() {
+        //  Given
+        WidgetRequest aValidRequest = aValidWidgetRequest();
+        when(widgetRepository.save(any())).then(returnsFirstArg());
+
+        Widget w1 = aValidWidget().z(2L);
+        Widget w2 = aValidWidget().z(3L);
+        when(widgetRepository.findAllByZGreaterThanOrEqual(2L)).thenReturn(Arrays.asList(w1, w2));
+
+        // When
+        aValidRequest.setZ(2L);
+        Widget response = widgetsService.addWidget(aValidRequest);
+
+        // then
+        assertThat(response.getZ()).isEqualTo(2);
+        verify(widgetRepository, times(3)).save(argumentCaptor.capture());
+        List<Widget> allSavedOrUpdatedWidgets = argumentCaptor.getAllValues();
+
+        assertThat(allSavedOrUpdatedWidgets)
+                .hasSize(3)
+                .contains(response, w1.z(3L), w2.z(4L));
+
+    }
+
+    private void insertThreeWidgetsWithZIndexOneTwoAndThree(WidgetRequest aValidRequest) {
         aValidRequest.setZ(1L);
         widgetsService.addWidget(aValidRequest);
 
@@ -87,12 +130,5 @@ class WidgetsServiceTest {
 
         aValidRequest.setZ(3L);
         widgetsService.addWidget(aValidRequest);
-
-        aValidRequest.setZ(null);
-        Widget response = widgetsService.addWidget(aValidRequest);
-
-        //  Then
-        assertThat(response.getZ()).isEqualTo(4);
-        assertThat(widgetsService.getHighestZIndex().get()).isEqualTo(response.getZ());
     }
 }

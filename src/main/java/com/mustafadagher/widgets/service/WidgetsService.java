@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -22,7 +23,28 @@ public class WidgetsService {
 
     public Widget addWidget(WidgetRequest widgetRequest) {
         Widget widget = mapToWidget(widgetRequest);
-        moveWidgetToForegroundIfZIndexNotSpecified(widget);
+
+        if (widget.getZ() == null) {
+            moveWidgetToForegroundIfZIndexNotSpecified(widget);
+        } else {
+            shiftAllWidgetsWithSameAndGreaterZIndexUpwards(widget);
+        }
+
+        return saveAndUpdateHighestZ(widget);
+    }
+
+    private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widget) {
+        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(widget.getZ());
+        if (allByZGreaterThanOrEqual != null) {
+            allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
+        }
+    }
+
+    private void incrementZIndexAndSave(Widget w) {
+        saveAndUpdateHighestZ(w.z(w.getZ() + 1));
+    }
+
+    private Widget saveAndUpdateHighestZ(Widget widget) {
         Widget saved = widgetRepository.save(widget);
         updateHighestZ(saved);
         return saved;
@@ -33,9 +55,7 @@ public class WidgetsService {
     }
 
     private void moveWidgetToForegroundIfZIndexNotSpecified(Widget widget) {
-        if(widget.getZ() == null) {
-            widget.z(highestZ.incrementAndGet());
-        }
+        widget.z(highestZ.incrementAndGet());
     }
 
     private void updateHighestZ(Widget saved) {
