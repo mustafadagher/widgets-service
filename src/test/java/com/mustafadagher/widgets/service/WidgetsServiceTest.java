@@ -1,5 +1,6 @@
 package com.mustafadagher.widgets.service;
 
+import com.mustafadagher.widgets.exception.WidgetNotFoundException;
 import com.mustafadagher.widgets.model.Widget;
 import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.repository.WidgetRepository;
@@ -11,15 +12,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Array;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.mustafadagher.widgets.Mocks.aValidWidget;
 import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -118,6 +119,21 @@ class WidgetsServiceTest {
         assertThat(allSavedOrUpdatedWidgets)
                 .hasSize(3)
                 .contains(response, w1.z(3L), w2.z(4L));
+
+    }
+
+    @Test
+    void testGetWidgetByIdThrowsWidgetNotFoundExceptionIfNotExists() {
+        // Given
+        UUID id = UUID.randomUUID();
+        when(widgetRepository.findById(id)).thenReturn(Optional.empty());
+
+        // When
+
+        Throwable thrown = catchThrowable(() -> widgetsService.getWidgetById(id));
+
+        //
+        assertThat(thrown).isInstanceOf(WidgetNotFoundException.class);
 
     }
 

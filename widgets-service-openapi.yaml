@@ -62,8 +62,8 @@ paths:
         style: simple
         explode: false
         schema:
-          type: integer
-          format: int64
+          type: string
+          format: uuid
       responses:
         "200":
           description: successful operation
@@ -88,8 +88,8 @@ paths:
         style: simple
         explode: false
         schema:
-          type: integer
-          format: int64
+          type: string
+          format: uuid
       requestBody:
         $ref: '#/components/requestBodies/Widget'
       responses:
@@ -114,8 +114,8 @@ paths:
         style: simple
         explode: false
         schema:
-          type: integer
-          format: int64
+          type: string
+          format: uuid
       responses:
         "400":
           description: Invalid ID supplied

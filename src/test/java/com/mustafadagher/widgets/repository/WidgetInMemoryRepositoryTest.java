@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.mustafadagher.widgets.Mocks.aValidWidget;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,7 @@ class WidgetInMemoryRepositoryTest {
 
         // When
         Widget savedWidget = widgetRepository.save(validWidget);
-        Widget searchedWidget = widgetRepository.findById(validWidget.getId());
+        Optional<Widget> searchedWidget = widgetRepository.findById(validWidget.getId());
 
         // Then
         assertThat(savedWidget)
@@ -32,8 +33,8 @@ class WidgetInMemoryRepositoryTest {
                 .isEqualTo(validWidget);
 
         assertThat(searchedWidget)
-                .isNotNull()
-                .isEqualTo(savedWidget);
+                .isNotEmpty()
+                .containsSame(savedWidget);
     }
 
     @Test

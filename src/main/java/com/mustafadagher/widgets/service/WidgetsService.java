@@ -1,5 +1,6 @@
 package com.mustafadagher.widgets.service;
 
+import com.mustafadagher.widgets.exception.WidgetNotFoundException;
 import com.mustafadagher.widgets.model.Widget;
 import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.repository.WidgetRepository;
@@ -74,5 +75,9 @@ public class WidgetsService {
                 .z(widgetRequest.getZ())
                 .height(widgetRequest.getHeight())
                 .width(widgetRequest.getWidth());
+    }
+
+    public Widget getWidgetById(UUID widgetId) {
+        return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
     }
 }
