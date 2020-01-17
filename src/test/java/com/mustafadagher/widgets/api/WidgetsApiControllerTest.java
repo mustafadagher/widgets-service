@@ -26,8 +26,7 @@ import java.util.UUID;
 
 import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesRegex;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.mockito.Mockito.verify;
@@ -76,7 +75,10 @@ class WidgetsApiControllerTest {
         // then
         result
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errors", hasItems("height must not be null", "x must not be null", "y must not be null", "width must not be null")));
+                .andExpect(jsonPath("$.message", containsString("height must not be null")))
+                .andExpect(jsonPath("$.message", containsString("width must not be null")))
+                .andExpect(jsonPath("$.message", containsString("x must not be null")))
+                .andExpect(jsonPath("$.message", containsString("y must not be null")));
     }
 
     @Test
@@ -98,7 +100,8 @@ class WidgetsApiControllerTest {
         // then
         result
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errors", hasItems("height must be greater than 0", "width must be greater than 0")));
+                .andExpect(jsonPath("$.message", containsString("height must be greater than 0")))
+                .andExpect(jsonPath("$.message", containsString("width must be greater than 0")));
     }
 
     @Test
@@ -246,7 +249,8 @@ class WidgetsApiControllerTest {
                         .andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
-        List<Widget> widgets = objectMapper.readValue(responseString, new TypeReference<List<Widget>>() {});
+        List<Widget> widgets = objectMapper.readValue(responseString, new TypeReference<List<Widget>>() {
+        });
 
         assertThat(widgets).hasSize(3);
 

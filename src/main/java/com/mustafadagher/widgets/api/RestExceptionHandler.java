@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -19,38 +20,31 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestControllerAdvice
-public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+public class RestExceptionHandler {
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                  HttpHeaders headers,
-                                                                  HttpStatus status, WebRequest request) {
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", OffsetDateTime.now());
-        body.put("status", status.value());
-
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ApiError> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         //Get all errors
-        List<String> errors = ex.getBindingResult()
+        String errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .collect(Collectors.joining(System.lineSeparator()));
 
-        body.put("errors", errors);
-
-        return new ResponseEntity<>(body, headers, status);
-
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, errors, ex);
+        return buildResponseEntity(apiError);
     }
 
+    @ResponseStatus(NOT_FOUND)
     @ExceptionHandler(WidgetNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound(
+    protected ResponseEntity<ApiError> handleEntityNotFound(
             WidgetNotFoundException ex) {
         ApiError apiError = new ApiError(NOT_FOUND, ex.getMessage(), ex);
         return buildResponseEntity(apiError);
     }
 
-    private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+    private ResponseEntity<ApiError> buildResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
 

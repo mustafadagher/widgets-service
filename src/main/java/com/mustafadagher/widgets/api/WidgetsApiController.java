@@ -6,8 +6,6 @@ import com.mustafadagher.widgets.service.WidgetsService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,11 +19,11 @@ public class WidgetsApiController implements WidgetsApi {
         this.widgetsService = widgetsService;
     }
 
-    public Widget addWidget(@Valid WidgetRequest widgetRequest) {
+    public Widget addWidget(WidgetRequest widgetRequest) {
         return widgetsService.addWidget(widgetRequest);
     }
 
-    public Widget getWidgetById(@Valid @NotNull UUID widgetId) {
+    public Widget getWidgetById(UUID widgetId) {
         return widgetsService.getWidgetById(widgetId);
     }
 
@@ -33,11 +31,11 @@ public class WidgetsApiController implements WidgetsApi {
         return widgetsService.getAllWidgets();
     }
 
-    public void deleteWidget(@Valid @NotNull UUID widgetId) {
+    public void deleteWidget(UUID widgetId) {
         widgetsService.deleteWidget(widgetId);
     }
 
-    public Widget updateWidget(@Valid @NotNull UUID widgetId, @Valid WidgetRequest widgetRequest) {
+    public Widget updateWidget(UUID widgetId, WidgetRequest widgetRequest) {
         return widgetsService.updateWidgetById(widgetId, widgetRequest);
     }
 

@@ -15,7 +15,6 @@ import java.util.UUID;
 @Validated
 public interface WidgetsApi {
 
-
     @PostMapping(value = "/widgets",
             produces = {"application/json"},
             consumes = {"application/json"})
@@ -41,5 +40,4 @@ public interface WidgetsApi {
             consumes = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
     Widget updateWidget(@Valid @NotNull @PathVariable("widgetId") UUID widgetId, @Valid @RequestBody WidgetRequest widgetRequest);
-
 }

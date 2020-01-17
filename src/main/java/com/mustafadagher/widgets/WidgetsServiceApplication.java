@@ -7,11 +7,9 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.mustafadagher.widgets", "com.mustafadagher.widgets.api", "com.mustafadagher.widgets.configuration"})
 public class WidgetsServiceApplication implements CommandLineRunner {
 
     @Override
