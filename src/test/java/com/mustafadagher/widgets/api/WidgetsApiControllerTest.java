@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -262,12 +263,14 @@ class WidgetsApiControllerTest {
         // When
         ResultActions result = mockMvc
                 .perform(delete("/widgets/{id}", id));
+        savedWidgets.remove(0);
 
         // Then
         verify(widgetsService).deleteWidget(id);
 
         result.andExpect(status().isNoContent());
     }
+
     @Test
     @Order(10)
     void testDeleteWidgetByNonExistingIdReturns404() throws Exception {
@@ -283,6 +286,67 @@ class WidgetsApiControllerTest {
 
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is("No Widgets found with the specified id")));
+    }
+
+    @Test
+    @Order(11)
+    void testUpdateWidgetWillReturnsCompleteWidgetDescription() throws Exception {
+        // Given
+        WidgetRequest widgetRequest = new WidgetRequest().z(14L).x(2L).y(16L).height(23.4F).width(11.6F);
+        UUID id = savedWidgets.get(0).getId();
+        OffsetDateTime lastModificationDate = savedWidgets.get(0).getLastModificationDate();
+
+        // When
+        ResultActions result = mockMvc
+                .perform(
+                        put("/widgets/{id}", id)
+                                .content(objectMapper.writeValueAsString(widgetRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
+
+        String responseString = result.andReturn().getResponse().getContentAsString();
+        Widget updated = objectMapper.readValue(responseString, Widget.class);
+        savedWidgets.set(0, updated);
+
+        // Then
+        verify(widgetsService).updateWidgetById(id, widgetRequest);
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(id.toString())))
+                .andExpect(jsonPath("$.x", is(widgetRequest.getX()), Long.class))
+                .andExpect(jsonPath("$.y", is(widgetRequest.getY()), Long.class))
+                .andExpect(jsonPath("$.z", is(widgetRequest.getZ()), Long.class))
+                .andExpect(jsonPath("$.width", is(widgetRequest.getWidth()), Float.class))
+                .andExpect(jsonPath("$.height", is(widgetRequest.getHeight()), Float.class));
+
+        assertThat(updated.getLastModificationDate())
+                .isAfter(lastModificationDate);
+
+    }
+
+    @Test
+    @Order(12)
+    void testUpdateWidgetByNonExistingIdReturns404() throws Exception {
+        // Given
+        WidgetRequest widgetRequest = new WidgetRequest().z(14L).x(2L).y(16L).height(23.4F).width(11.6F);
+        UUID id = UUID.randomUUID();
+
+        // When
+        ResultActions result = mockMvc
+                .perform(
+                        put("/widgets/{id}", id)
+                                .content(objectMapper.writeValueAsString(widgetRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
+
+
+        // Then
+        verify(widgetsService).updateWidgetById(id, widgetRequest);
+
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("No Widgets found with the specified id")));
+
+
     }
 
     private void addAThirdWidgetWithZEqualNegative5() throws Exception {

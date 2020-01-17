@@ -36,25 +36,62 @@ public class WidgetsService {
         return saveAndUpdateHighestZ(widget);
     }
 
-    private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widget) {
-        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(widget.getZ());
-        if (allByZGreaterThanOrEqual != null) {
-            allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
+    public Widget getWidgetById(UUID widgetId) {
+        return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
+    }
+
+    public List<Widget> getAllWidgets() {
+        List<Widget> allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc();
+
+        if (allByOrderByZAsc == null)
+            return Collections.emptyList();
+
+        return allByOrderByZAsc;
+    }
+
+    public void deleteWidget(UUID widgetId) {
+        Optional<Widget> widget = widgetRepository.findById(widgetId);
+
+        if (widget.isPresent())
+            widgetRepository.deleteById(widgetId);
+        else
+            throw new WidgetNotFoundException();
+    }
+
+    public Widget updateWidgetById(UUID id, WidgetRequest widgetRequest) {
+        Widget current = widgetRepository.findById(id).orElseThrow(WidgetNotFoundException::new);
+
+        Widget updated = mapToWidget(widgetRequest);
+        updated.id(current.getId()).lastModificationDate(OffsetDateTime.now());
+
+        return saveAndUpdateHighestZ(updated);
+    }
+
+    AtomicLong getHighestZIndex() {
+        return highestZ;
+    }
+
+    private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widgetToBeInserted) {
+        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(widgetToBeInserted.getZ());
+        if (allByZGreaterThanOrEqual != null && !allByZGreaterThanOrEqual.isEmpty()) {
+            Widget existingWidgetWithLowestZ = allByZGreaterThanOrEqual.get(0);
+
+            if (existingWidgetWithLowestZ.getZ().equals(widgetToBeInserted.getZ()))
+                allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
         }
     }
 
     private void incrementZIndexAndSave(Widget w) {
-        saveAndUpdateHighestZ(w.z(w.getZ() + 1));
+        Widget updated = w.z(w.getZ() + 1)
+                .lastModificationDate(OffsetDateTime.now());
+
+        saveAndUpdateHighestZ(updated);
     }
 
     private Widget saveAndUpdateHighestZ(Widget widget) {
         Widget saved = widgetRepository.save(widget);
         updateHighestZ(saved);
         return saved;
-    }
-
-    AtomicLong getHighestZIndex() {
-        return highestZ;
     }
 
     private void moveWidgetToForegroundIfZIndexNotSpecified(Widget widget) {
@@ -77,27 +114,5 @@ public class WidgetsService {
                 .z(widgetRequest.getZ())
                 .height(widgetRequest.getHeight())
                 .width(widgetRequest.getWidth());
-    }
-
-    public Widget getWidgetById(UUID widgetId) {
-        return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
-    }
-
-    public List<Widget> getAllWidgets() {
-        List<Widget> allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc();
-
-        if (allByOrderByZAsc == null)
-            return Collections.emptyList();
-
-        return allByOrderByZAsc;
-    }
-
-    public void deleteWidget(UUID widgetId) {
-        Optional<Widget> widget = widgetRepository.findById(widgetId);
-
-        if (widget.isPresent())
-            widgetRepository.deleteById(widgetId);
-        else
-            throw new WidgetNotFoundException();
     }
 }

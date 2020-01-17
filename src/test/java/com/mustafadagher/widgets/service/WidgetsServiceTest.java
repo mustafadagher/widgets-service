@@ -193,6 +193,43 @@ class WidgetsServiceTest {
         assertThat(thrown).isInstanceOf(WidgetNotFoundException.class);
     }
 
+    @Test
+    void testUpdateWidget() {
+        // Given
+        Widget widget = aValidWidget();
+        when(widgetRepository.findById(widget.getId())).thenReturn(Optional.of(widget));
+        when(widgetRepository.save(any())).then(returnsFirstArg());
+
+        // When
+
+        widgetsService.updateWidgetById(widget.getId(), aValidWidgetRequest());
+
+        //
+        verify(widgetRepository).save(argumentCaptor.capture());
+
+        Widget toBeSavedWidget = argumentCaptor.getValue();
+
+        assertThat(toBeSavedWidget)
+                .isEqualToIgnoringGivenFields(widget, "lastModificationDate");
+
+        assertThat(toBeSavedWidget.getLastModificationDate())
+                .isAfter(widget.getLastModificationDate());
+    }
+
+    @Test
+    void testUpdateWidgetThrowsWidgetNotFoundExceptionIfNotExists() {
+        // Given
+        UUID id = UUID.randomUUID();
+        when(widgetRepository.findById(id)).thenReturn(Optional.empty());
+
+        // When
+
+        Throwable thrown = catchThrowable(() -> widgetsService.updateWidgetById(id, aValidWidgetRequest()));
+
+        //
+        assertThat(thrown).isInstanceOf(WidgetNotFoundException.class);
+    }
+
     private void insertThreeWidgetsWithZIndexOneTwoAndThree(WidgetRequest aValidRequest) {
         aValidRequest.setZ(1L);
         widgetsService.addWidget(aValidRequest);

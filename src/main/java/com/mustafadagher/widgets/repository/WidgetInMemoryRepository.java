@@ -3,10 +3,11 @@ package com.mustafadagher.widgets.repository;
 import com.mustafadagher.widgets.model.Widget;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Repository
@@ -18,7 +19,7 @@ public class WidgetInMemoryRepository implements WidgetRepository {
     }
 
     public Widget save(Widget widget) {
-        return storage.computeIfAbsent(widget.getId(), updateWidgetDescriptionFn(widget));
+        return storage.merge(widget.getId(), widget, updateWidgetDescriptionFn());
     }
 
     public List<Widget> findAll() {
@@ -50,14 +51,19 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         return Optional.ofNullable(storage.get(id));
     }
 
-    private Function<UUID, Widget> updateWidgetDescriptionFn(Widget widget) {
-        return i -> {
-            if (storage.containsKey(i)) {
-                AtomicReference<Widget> old = new AtomicReference<>(storage.get(i));
+    private BiFunction<Widget, Widget, Widget> updateWidgetDescriptionFn() {
+        return (current, updated) -> {
+            if (current != null) {
+                AtomicReference<Widget> currentReference = new AtomicReference<>(current);
 
-                return old.updateAndGet(w -> w.x(widget.getX()).y(widget.getY()).z(widget.getZ()).height(widget.getHeight()).width(widget.getWidth()));
+                return currentReference.updateAndGet(w -> w.x(updated.getX())
+                        .y(updated.getY())
+                        .z(updated.getZ())
+                        .height(updated.getHeight())
+                        .width(updated.getWidth()))
+                        .lastModificationDate(OffsetDateTime.now());
             }
-            return widget;
+            return updated;
         };
     }
 }

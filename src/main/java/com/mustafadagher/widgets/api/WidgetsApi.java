@@ -9,7 +9,6 @@ import com.mustafadagher.widgets.model.Widget;
 import com.mustafadagher.widgets.model.WidgetRequest;
 import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,6 +67,6 @@ public interface WidgetsApi {
             produces = {"application/json"},
             consumes = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Widget> updateWidget(@ApiParam(value = "ID of widget that needs to be updated", required = true) @Valid @NotNull @PathVariable("widgetId") UUID widgetId, @ApiParam(value = "Widget object that needs to be added", required = true) @Valid @RequestBody WidgetRequest widgetRequest);
+    Widget updateWidget(@ApiParam(value = "ID of widget that needs to be updated", required = true) @Valid @NotNull @PathVariable("widgetId") UUID widgetId, @ApiParam(value = "Widget object that needs to be added", required = true) @Valid @RequestBody WidgetRequest widgetRequest);
 
 }
