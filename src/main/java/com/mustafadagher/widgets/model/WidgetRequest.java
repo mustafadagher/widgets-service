@@ -1,7 +1,6 @@
 package com.mustafadagher.widgets.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -29,7 +28,6 @@ public class WidgetRequest {
     }
 
 
-    @ApiModelProperty(required = true)
     @NotNull
     public Long getX() {
         return x;
@@ -45,7 +43,6 @@ public class WidgetRequest {
     }
 
 
-    @ApiModelProperty(required = true)
     @NotNull
     public Long getY() {
         return y;
@@ -60,7 +57,6 @@ public class WidgetRequest {
         return this;
     }
 
-    @ApiModelProperty
     public Long getZ() {
         return z;
     }
@@ -75,7 +71,6 @@ public class WidgetRequest {
     }
 
 
-    @ApiModelProperty(required = true)
     @NotNull
     @DecimalMin(value = "0", inclusive = false)
     public Float getWidth() {
@@ -91,7 +86,6 @@ public class WidgetRequest {
         return this;
     }
 
-    @ApiModelProperty(required = true)
     @NotNull
     @DecimalMin(value = "0", inclusive = false)
     public Float getHeight() {

@@ -1,7 +1,6 @@
 package com.mustafadagher.widgets.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
@@ -37,7 +36,6 @@ public class Widget {
         return this;
     }
 
-    @ApiModelProperty
     @Valid
     public UUID getId() {
         return id;
@@ -52,7 +50,6 @@ public class Widget {
         return this;
     }
 
-    @ApiModelProperty(required = true)
     @NotNull
     public Long getX() {
         return x;
@@ -67,7 +64,6 @@ public class Widget {
         return this;
     }
 
-    @ApiModelProperty(required = true)
     @NotNull
     public Long getY() {
         return y;
@@ -82,7 +78,6 @@ public class Widget {
         return this;
     }
 
-    @ApiModelProperty
     public Long getZ() {
         return z;
     }
@@ -96,7 +91,6 @@ public class Widget {
         return this;
     }
 
-    @ApiModelProperty(required = true)
     @NotNull
     @DecimalMin(value = "0", inclusive = false)
     public Float getWidth() {
@@ -112,7 +106,6 @@ public class Widget {
         return this;
     }
 
-    @ApiModelProperty(required = true)
     @NotNull
     @Valid
     @DecimalMin(value = "0", inclusive = false)
@@ -130,7 +123,6 @@ public class Widget {
     }
 
 
-    @ApiModelProperty
     @Valid
     public OffsetDateTime getLastModificationDate() {
         return lastModificationDate;
