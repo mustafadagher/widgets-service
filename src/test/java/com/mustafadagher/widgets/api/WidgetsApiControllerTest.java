@@ -20,15 +20,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -50,7 +47,7 @@ class WidgetsApiControllerTest {
     @SpyBean
     private WidgetsService widgetsService;
 
-    private static List<Widget> savedWidgets = new ArrayList<>();
+    private static Map<UUID, Widget> savedWidgets = new LinkedHashMap<>();
 
     @Test
     @Order(1)
@@ -119,7 +116,8 @@ class WidgetsApiControllerTest {
                 ).andDo(print());
 
         String responseString = result.andReturn().getResponse().getContentAsString();
-        savedWidgets.add(objectMapper.readValue(responseString, Widget.class));
+        Widget saved = objectMapper.readValue(responseString, Widget.class);
+        savedWidgets.put(saved.getId(), saved);
 
         // Then
         verify(widgetsService).addWidget(widgetRequest);
@@ -150,7 +148,8 @@ class WidgetsApiControllerTest {
                 ).andDo(print());
 
         String responseString = result.andReturn().getResponse().getContentAsString();
-        savedWidgets.add(objectMapper.readValue(responseString, Widget.class));
+        Widget saved = objectMapper.readValue(responseString, Widget.class);
+        savedWidgets.put(saved.getId(), saved);
 
         // Then
         verify(widgetsService).addWidget(widgetRequestWithNoZ);
@@ -167,7 +166,8 @@ class WidgetsApiControllerTest {
     @Order(6)
     void testGetWidgetByIdReturnsFullWidgetDescription() throws Exception {
         // Given
-        Widget savedWidget = savedWidgets.get(0);
+        Widget[] widgets = savedWidgets.values().toArray(new Widget[0]);
+        Widget savedWidget = widgets[0];
         UUID id = savedWidget.getId();
 
         // When
@@ -223,29 +223,29 @@ class WidgetsApiControllerTest {
 
         // Then
         verify(widgetsService).getAllWidgets();
-
+        List<Widget> savedWidgetList = new ArrayList(savedWidgets.values());
         MvcResult mvcResult =
                 result.andExpect(status().isOk())
                         .andExpect(jsonPath("$.*").isArray())
                         .andExpect(jsonPath("$.*", hasSize(3)))
-                        .andExpect(jsonPath("$.[0].id", is(savedWidgets.get(2).getId().toString())))
-                        .andExpect(jsonPath("$[0].x", is(savedWidgets.get(2).getX()), Long.class))
-                        .andExpect(jsonPath("$[0].y", is(savedWidgets.get(2).getY()), Long.class))
-                        .andExpect(jsonPath("$[0].z", is(savedWidgets.get(2).getZ()), Long.class))
-                        .andExpect(jsonPath("$[0].width", is(savedWidgets.get(2).getWidth()), Float.class))
-                        .andExpect(jsonPath("$[0].height", is(savedWidgets.get(2).getHeight()), Float.class))
-                        .andExpect(jsonPath("$[1].id", is(savedWidgets.get(0).getId().toString())))
-                        .andExpect(jsonPath("$[1].x", is(savedWidgets.get(0).getX()), Long.class))
-                        .andExpect(jsonPath("$[1].y", is(savedWidgets.get(0).getY()), Long.class))
-                        .andExpect(jsonPath("$[1].z", is(savedWidgets.get(0).getZ()), Long.class))
-                        .andExpect(jsonPath("$[1].width", is(savedWidgets.get(0).getWidth()), Float.class))
-                        .andExpect(jsonPath("$[1].height", is(savedWidgets.get(0).getHeight()), Float.class))
-                        .andExpect(jsonPath("$[2].id", is(savedWidgets.get(1).getId().toString())))
-                        .andExpect(jsonPath("$[2].x", is(savedWidgets.get(1).getX()), Long.class))
-                        .andExpect(jsonPath("$[2].y", is(savedWidgets.get(1).getY()), Long.class))
-                        .andExpect(jsonPath("$[2].z", is(savedWidgets.get(1).getZ()), Long.class))
-                        .andExpect(jsonPath("$[2].width", is(savedWidgets.get(1).getWidth()), Float.class))
-                        .andExpect(jsonPath("$[2].height", is(savedWidgets.get(1).getHeight()), Float.class))
+                        .andExpect(jsonPath("$[0].id", is(savedWidgetList.get(2).getId().toString())))
+                        .andExpect(jsonPath("$[0].x", is(savedWidgetList.get(2).getX()), Long.class))
+                        .andExpect(jsonPath("$[0].y", is(savedWidgetList.get(2).getY()), Long.class))
+                        .andExpect(jsonPath("$[0].z", is(savedWidgetList.get(2).getZ()), Long.class))
+                        .andExpect(jsonPath("$[0].width", is(savedWidgetList.get(2).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[0].height", is(savedWidgetList.get(2).getHeight()), Float.class))
+                        .andExpect(jsonPath("$[1].id", is(savedWidgetList.get(0).getId().toString())))
+                        .andExpect(jsonPath("$[1].x", is(savedWidgetList.get(0).getX()), Long.class))
+                        .andExpect(jsonPath("$[1].y", is(savedWidgetList.get(0).getY()), Long.class))
+                        .andExpect(jsonPath("$[1].z", is(savedWidgetList.get(0).getZ()), Long.class))
+                        .andExpect(jsonPath("$[1].width", is(savedWidgetList.get(0).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[1].height", is(savedWidgetList.get(0).getHeight()), Float.class))
+                        .andExpect(jsonPath("$[2].id", is(savedWidgetList.get(1).getId().toString())))
+                        .andExpect(jsonPath("$[2].x", is(savedWidgetList.get(1).getX()), Long.class))
+                        .andExpect(jsonPath("$[2].y", is(savedWidgetList.get(1).getY()), Long.class))
+                        .andExpect(jsonPath("$[2].z", is(savedWidgetList.get(1).getZ()), Long.class))
+                        .andExpect(jsonPath("$[2].width", is(savedWidgetList.get(1).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[2].height", is(savedWidgetList.get(1).getHeight()), Float.class))
                         .andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
@@ -255,19 +255,58 @@ class WidgetsApiControllerTest {
         assertThat(widgets).hasSize(3);
 
         assertThat(widgets.get(0).getLastModificationDate())
-                .isAtSameInstantAs(savedWidgets.get(2).getLastModificationDate());
+                .isAtSameInstantAs(savedWidgetList.get(2).getLastModificationDate());
     }
 
     @Test
     @Order(9)
+    void testWidgetWithSpecifiedIndexPushesAllWidgetsWithEqualOrHigherIndexesUpwards() throws Exception {
+        // Given
+        WidgetRequest request = aValidWidgetRequest().z(-1L);
+
+        // When
+        ResultActions result = mockMvc
+                .perform(
+                        post("/widgets")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
+
+        String responseString = result.andReturn().getResponse().getContentAsString();
+        Widget saved = objectMapper.readValue(responseString, Widget.class);
+        savedWidgets.put(saved.getId(), saved);
+
+        // Then
+        verify(widgetsService).addWidget(request);
+
+        result.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.lastModificationDate").exists())
+                .andExpect(jsonPath("$.z", is(request.getZ()), Long.class));
+
+        List<Widget> allWidgetsAfterLastInsert = widgetsService.getAllWidgets();
+
+        allWidgetsAfterLastInsert.stream().filter(w -> w.getZ() > request.getZ()).forEach(afterWidget -> {
+            Widget before = savedWidgets.get(afterWidget.getId());
+            assertThat(afterWidget.getZ()).isEqualTo(before.getZ() + 1);
+
+            assertThat(afterWidget.getLastModificationDate())
+                    .isAfter(before.getLastModificationDate());
+        });
+    }
+
+    @Test
+    @Order(10)
     void testDeleteWidgetByIdReturns204() throws Exception {
         // Given
-        UUID id = savedWidgets.get(0).getId();
+        Widget[] widgets = savedWidgets.values().toArray(new Widget[0]);
+        Widget savedWidget = widgets[0];
+        UUID id = savedWidget.getId();
 
         // When
         ResultActions result = mockMvc
                 .perform(delete("/widgets/{id}", id));
-        savedWidgets.remove(0);
+        savedWidgets.remove(id);
 
         // Then
         verify(widgetsService).deleteWidget(id);
@@ -276,7 +315,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     void testDeleteWidgetByNonExistingIdReturns404() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
@@ -293,12 +332,14 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     void testUpdateWidgetWillReturnsCompleteWidgetDescription() throws Exception {
         // Given
         WidgetRequest widgetRequest = new WidgetRequest().z(14L).x(2L).y(16L).height(23.4F).width(11.6F);
-        UUID id = savedWidgets.get(0).getId();
-        OffsetDateTime lastModificationDate = savedWidgets.get(0).getLastModificationDate();
+        Widget[] widgets = savedWidgets.values().toArray(new Widget[0]);
+        Widget savedWidget = widgets[0];
+        UUID id = savedWidget.getId();
+        OffsetDateTime lastModificationDate = savedWidget.getLastModificationDate();
 
         // When
         ResultActions result = mockMvc
@@ -310,7 +351,7 @@ class WidgetsApiControllerTest {
 
         String responseString = result.andReturn().getResponse().getContentAsString();
         Widget updated = objectMapper.readValue(responseString, Widget.class);
-        savedWidgets.set(0, updated);
+        savedWidgets.put(updated.getId(), updated);
 
         // Then
         verify(widgetsService).updateWidgetById(id, widgetRequest);
@@ -365,6 +406,7 @@ class WidgetsApiControllerTest {
                 ).andDo(print());
 
         String responseString = result.andReturn().getResponse().getContentAsString();
-        savedWidgets.add(objectMapper.readValue(responseString, Widget.class));
+        Widget saved = objectMapper.readValue(responseString, Widget.class);
+        savedWidgets.put(saved.getId(), saved);
     }
 }
