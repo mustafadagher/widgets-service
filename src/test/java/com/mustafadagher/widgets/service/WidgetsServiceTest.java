@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
@@ -196,7 +197,8 @@ class WidgetsServiceTest {
     @Test
     void testUpdateWidget() {
         // Given
-        Widget widget = aValidWidget();
+        OffsetDateTime aMinuteAgo = OffsetDateTime.now().minus(1, ChronoUnit.MINUTES);
+        Widget widget = aValidWidget().lastModificationDate(aMinuteAgo);
         when(widgetRepository.findById(widget.getId())).thenReturn(Optional.of(widget));
         when(widgetRepository.save(any())).then(returnsFirstArg());
 

@@ -53,17 +53,14 @@ public class WidgetInMemoryRepository implements WidgetRepository {
 
     private BiFunction<Widget, Widget, Widget> updateWidgetDescriptionFn() {
         return (current, updated) -> {
-            if (current != null) {
-                AtomicReference<Widget> currentReference = new AtomicReference<>(current);
+            AtomicReference<Widget> currentReference = new AtomicReference<>(current);
 
-                return currentReference.updateAndGet(w -> w.x(updated.getX())
-                        .y(updated.getY())
-                        .z(updated.getZ())
-                        .height(updated.getHeight())
-                        .width(updated.getWidth()))
-                        .lastModificationDate(OffsetDateTime.now());
-            }
-            return updated;
+            return currentReference.updateAndGet(w -> w.x(updated.getX())
+                    .y(updated.getY())
+                    .z(updated.getZ())
+                    .height(updated.getHeight())
+                    .width(updated.getWidth()))
+                    .lastModificationDate(OffsetDateTime.now());
         };
     }
 }
