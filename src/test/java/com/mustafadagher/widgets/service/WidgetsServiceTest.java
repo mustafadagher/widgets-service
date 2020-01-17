@@ -165,6 +165,34 @@ class WidgetsServiceTest {
         assertThat(allWidgets).isNotNull().isEmpty();
     }
 
+    @Test
+    void testDeleteWidget() {
+        // Given
+        Widget widget = aValidWidget();
+        when(widgetRepository.findById(widget.getId())).thenReturn(Optional.of(widget));
+
+        // When
+
+        widgetsService.deleteWidget(widget.getId());
+
+        //
+        verify(widgetRepository).deleteById(widget.getId());
+    }
+
+    @Test
+    void testDeleteWidgetThrowsWidgetNotFoundExceptionIfNotExists() {
+        // Given
+        UUID id = UUID.randomUUID();
+        when(widgetRepository.findById(id)).thenReturn(Optional.empty());
+
+        // When
+
+        Throwable thrown = catchThrowable(() -> widgetsService.deleteWidget(id));
+
+        //
+        assertThat(thrown).isInstanceOf(WidgetNotFoundException.class);
+    }
+
     private void insertThreeWidgetsWithZIndexOneTwoAndThree(WidgetRequest aValidRequest) {
         aValidRequest.setZ(1L);
         widgetsService.addWidget(aValidRequest);

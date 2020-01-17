@@ -99,4 +99,24 @@ class WidgetInMemoryRepositoryTest {
 
         assertThat(updated.getId()).isEqualTo(w1.getId());
     }
+
+    @Test
+    void testDeleteById() {
+        // Given
+        Widget w1 = aValidWidget().z(1L);
+        Widget w2 = aValidWidget().z(2L).height(22.3F).width(11.7F);
+        Widget w3 = aValidWidget().z(6L);
+
+        widgetRepository.save(w1);
+        widgetRepository.save(w2);
+        widgetRepository.save(w3);
+
+        // When
+        widgetRepository.deleteById(w1.getId());
+
+        // Then
+        List<Widget> all = widgetRepository.findAll();
+        assertThat(all).hasSize(2)
+                .doesNotContain(w1);
+    }
 }

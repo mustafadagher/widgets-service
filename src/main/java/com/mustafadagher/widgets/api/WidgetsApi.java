@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +40,7 @@ public interface WidgetsApi {
             @ApiResponse(code = 404, message = "Widget not found")})
     @DeleteMapping(value = "/widgets/{widgetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    ResponseEntity<Void> deleteWidget(@ApiParam(value = "Widget id to delete", required = true) @PathVariable("widgetId") UUID widgetId);
+    void deleteWidget(@ApiParam(value = "Widget id to delete", required = true) @Valid @NotNull @PathVariable("widgetId") UUID widgetId);
 
     @ApiOperation(value = "Get all widgets", nickname = "getAllWidgets", notes = "Returns an array of widgets", response = Widget.class, responseContainer = "List", tags = {"widget",})
     @ApiResponses(value = {
@@ -57,7 +58,7 @@ public interface WidgetsApi {
             @ApiResponse(code = 404, message = "Widget not found")})
     @GetMapping(value = "/widgets/{widgetId}", produces = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
-    Widget getWidgetById(@ApiParam(value = "ID of widget to return", required = true) @PathVariable("widgetId") UUID widgetId);
+    Widget getWidgetById(@ApiParam(value = "ID of widget to return", required = true) @Valid @NotNull @PathVariable("widgetId") UUID widgetId);
 
     @ApiOperation(value = "Updates a widget in the store", nickname = "updateWidget", response = Widget.class, tags = {"widget",})
     @ApiResponses(value = {
@@ -67,6 +68,6 @@ public interface WidgetsApi {
             produces = {"application/json"},
             consumes = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Widget> updateWidget(@ApiParam(value = "ID of widget that needs to be updated", required = true) @PathVariable("widgetId") UUID widgetId, @ApiParam(value = "Widget object that needs to be added", required = true) @Valid @RequestBody WidgetRequest widgetRequest);
+    ResponseEntity<Widget> updateWidget(@ApiParam(value = "ID of widget that needs to be updated", required = true) @Valid @NotNull @PathVariable("widgetId") UUID widgetId, @ApiParam(value = "Widget object that needs to be added", required = true) @Valid @RequestBody WidgetRequest widgetRequest);
 
 }

@@ -29,6 +29,10 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         return findAllByOrderBy(Comparator.comparing(Widget::getZ));
     }
 
+    public void deleteById(UUID widgetId) {
+        storage.remove(widgetId);
+    }
+
     private List<Widget> findAllByOrderBy(Comparator<Widget> sortedBy) {
         return storage.values().stream()
                 .sorted(sortedBy)

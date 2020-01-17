@@ -30,8 +30,7 @@ import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -252,6 +251,38 @@ class WidgetsApiControllerTest {
 
         assertThat(widgets.get(0).getLastModificationDate())
                 .isAtSameInstantAs(savedWidgets.get(2).getLastModificationDate());
+    }
+
+    @Test
+    @Order(9)
+    void testDeleteWidgetByIdReturns204() throws Exception {
+        // Given
+        UUID id = savedWidgets.get(0).getId();
+
+        // When
+        ResultActions result = mockMvc
+                .perform(delete("/widgets/{id}", id));
+
+        // Then
+        verify(widgetsService).deleteWidget(id);
+
+        result.andExpect(status().isNoContent());
+    }
+    @Test
+    @Order(10)
+    void testDeleteWidgetByNonExistingIdReturns404() throws Exception {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        // When
+        ResultActions result = mockMvc
+                .perform(delete("/widgets/{id}", id));
+
+        // Then
+        verify(widgetsService).deleteWidget(id);
+
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("No Widgets found with the specified id")));
     }
 
     private void addAThirdWidgetWithZEqualNegative5() throws Exception {

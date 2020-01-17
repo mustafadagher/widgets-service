@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public class WidgetsApiController implements WidgetsApi {
         return widgetsService.addWidget(widgetRequest);
     }
 
-    public Widget getWidgetById(UUID widgetId) {
+    public Widget getWidgetById(@Valid @NotNull UUID widgetId) {
         return widgetsService.getWidgetById(widgetId);
     }
 
@@ -34,14 +35,12 @@ public class WidgetsApiController implements WidgetsApi {
         return widgetsService.getAllWidgets();
     }
 
-    @Override
-    public ResponseEntity<Void> deleteWidget(UUID widgetId) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-
+    public void deleteWidget(@Valid @NotNull UUID widgetId) {
+        widgetsService.deleteWidget(widgetId);
     }
 
     @Override
-    public ResponseEntity<Widget> updateWidget(UUID widgetId, @Valid WidgetRequest widgetRequest) {
+    public ResponseEntity<Widget> updateWidget(@Valid @NotNull UUID widgetId, @Valid WidgetRequest widgetRequest) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 

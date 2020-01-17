@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -89,5 +90,14 @@ public class WidgetsService {
             return Collections.emptyList();
 
         return allByOrderByZAsc;
+    }
+
+    public void deleteWidget(UUID widgetId) {
+        Optional<Widget> widget = widgetRepository.findById(widgetId);
+
+        if (widget.isPresent())
+            widgetRepository.deleteById(widgetId);
+        else
+            throw new WidgetNotFoundException();
     }
 }

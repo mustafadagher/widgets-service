@@ -16,4 +16,6 @@ public interface WidgetRepository {
     List<Widget> findAllByZGreaterThanOrEqual(Long z);
 
     List<Widget> findAllByOrderByZAsc();
+
+    void deleteById(UUID widgetId);
 }
