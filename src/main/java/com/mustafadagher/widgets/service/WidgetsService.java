@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -79,5 +80,14 @@ public class WidgetsService {
 
     public Widget getWidgetById(UUID widgetId) {
         return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
+    }
+
+    public List<Widget> getAllWidgets() {
+        List<Widget> allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc();
+
+        if (allByOrderByZAsc == null)
+            return Collections.emptyList();
+
+        return allByOrderByZAsc;
     }
 }

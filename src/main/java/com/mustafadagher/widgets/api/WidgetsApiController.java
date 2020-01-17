@@ -30,15 +30,14 @@ public class WidgetsApiController implements WidgetsApi {
         return widgetsService.getWidgetById(widgetId);
     }
 
+    public List<Widget> getAllWidgets() {
+        return widgetsService.getAllWidgets();
+    }
+
     @Override
     public ResponseEntity<Void> deleteWidget(UUID widgetId) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
 
-    }
-
-    @Override
-    public ResponseEntity<List<Widget>> getAllWidgets() {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Override

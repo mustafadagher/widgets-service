@@ -137,6 +137,34 @@ class WidgetsServiceTest {
 
     }
 
+    @Test
+    void testGetAllWidgetsReturnsAllSortedByZ() {
+        // Given
+        givenRepositoryReturnsThreeWidgets();
+
+        // When
+        List<Widget> allWidgets = widgetsService.getAllWidgets();
+
+        // Then
+        verify(widgetRepository).findAllByOrderByZAsc();
+
+        assertThat(allWidgets).hasSize(3);
+    }
+
+    @Test
+    void testGetAllWidgetsReturnsEmptyListIfEmpty() {
+        // Given
+        when(widgetRepository.findAllByOrderByZAsc()).thenReturn(null);
+
+        // When
+        List<Widget> allWidgets = widgetsService.getAllWidgets();
+
+        // Then
+        verify(widgetRepository).findAllByOrderByZAsc();
+
+        assertThat(allWidgets).isNotNull().isEmpty();
+    }
+
     private void insertThreeWidgetsWithZIndexOneTwoAndThree(WidgetRequest aValidRequest) {
         aValidRequest.setZ(1L);
         widgetsService.addWidget(aValidRequest);
@@ -146,5 +174,10 @@ class WidgetsServiceTest {
 
         aValidRequest.setZ(3L);
         widgetsService.addWidget(aValidRequest);
+    }
+
+    private void givenRepositoryReturnsThreeWidgets() {
+        List<Widget> widgetList = Arrays.asList(aValidWidget(), aValidWidget(), aValidWidget());
+        when(widgetRepository.findAllByOrderByZAsc()).thenReturn(widgetList);
     }
 }

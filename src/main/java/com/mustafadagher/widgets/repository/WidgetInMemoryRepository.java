@@ -22,8 +22,16 @@ public class WidgetInMemoryRepository implements WidgetRepository {
     }
 
     public List<Widget> findAll() {
+        return new ArrayList<>(storage.values());
+    }
+
+    public List<Widget> findAllByOrderByZAsc() {
+        return findAllByOrderBy(Comparator.comparing(Widget::getZ));
+    }
+
+    private List<Widget> findAllByOrderBy(Comparator<Widget> sortedBy) {
         return storage.values().stream()
-                .sorted(Comparator.comparing(Widget::getZ))
+                .sorted(sortedBy)
                 .collect(Collectors.toList());
     }
 

@@ -1,5 +1,6 @@
 package com.mustafadagher.widgets.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mustafadagher.widgets.model.Widget;
 import com.mustafadagher.widgets.model.WidgetRequest;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
@@ -53,7 +55,7 @@ class WidgetsApiControllerTest {
 
     @Test
     @Order(1)
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(widgetsApiController).isNotNull();
     }
 
@@ -173,7 +175,7 @@ class WidgetsApiControllerTest {
         verify(widgetsService).getWidgetById(id);
 
         MvcResult mvcResult =
-                result.andExpect(status().isCreated())
+                result.andExpect(status().isOk())
                         .andExpect(jsonPath("$.id", is(id.toString())))
                         .andExpect(jsonPath("$.x", is(savedWidget.getX()), Long.class))
                         .andExpect(jsonPath("$.y", is(savedWidget.getY()), Long.class))
@@ -191,7 +193,7 @@ class WidgetsApiControllerTest {
 
     @Test
     @Order(7)
-    void getWidgetByNonExistingIdReturns404() throws Exception {
+    void testGetWidgetByNonExistingIdReturns404() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
 
@@ -204,5 +206,66 @@ class WidgetsApiControllerTest {
 
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is("No Widgets found with the specified id")));
+    }
+
+    @Test
+    @Order(8)
+    void testGetAllWidgetsReturnsWidgetsSortedByZ() throws Exception {
+        // Given
+        addAThirdWidgetWithZEqualNegative5();
+
+        // When
+        ResultActions result = mockMvc
+                .perform(get("/widgets"));
+
+        // Then
+        verify(widgetsService).getAllWidgets();
+
+        MvcResult mvcResult =
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.*").isArray())
+                        .andExpect(jsonPath("$.*", hasSize(3)))
+                        .andExpect(jsonPath("$.[0].id", is(savedWidgets.get(2).getId().toString())))
+                        .andExpect(jsonPath("$[0].x", is(savedWidgets.get(2).getX()), Long.class))
+                        .andExpect(jsonPath("$[0].y", is(savedWidgets.get(2).getY()), Long.class))
+                        .andExpect(jsonPath("$[0].z", is(savedWidgets.get(2).getZ()), Long.class))
+                        .andExpect(jsonPath("$[0].width", is(savedWidgets.get(2).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[0].height", is(savedWidgets.get(2).getHeight()), Float.class))
+                        .andExpect(jsonPath("$[1].id", is(savedWidgets.get(0).getId().toString())))
+                        .andExpect(jsonPath("$[1].x", is(savedWidgets.get(0).getX()), Long.class))
+                        .andExpect(jsonPath("$[1].y", is(savedWidgets.get(0).getY()), Long.class))
+                        .andExpect(jsonPath("$[1].z", is(savedWidgets.get(0).getZ()), Long.class))
+                        .andExpect(jsonPath("$[1].width", is(savedWidgets.get(0).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[1].height", is(savedWidgets.get(0).getHeight()), Float.class))
+                        .andExpect(jsonPath("$[2].id", is(savedWidgets.get(1).getId().toString())))
+                        .andExpect(jsonPath("$[2].x", is(savedWidgets.get(1).getX()), Long.class))
+                        .andExpect(jsonPath("$[2].y", is(savedWidgets.get(1).getY()), Long.class))
+                        .andExpect(jsonPath("$[2].z", is(savedWidgets.get(1).getZ()), Long.class))
+                        .andExpect(jsonPath("$[2].width", is(savedWidgets.get(1).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[2].height", is(savedWidgets.get(1).getHeight()), Float.class))
+                        .andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        List<Widget> widgets = objectMapper.readValue(responseString, new TypeReference<List<Widget>>() {});
+
+        assertThat(widgets).hasSize(3);
+
+        assertThat(widgets.get(0).getLastModificationDate())
+                .isAtSameInstantAs(savedWidgets.get(2).getLastModificationDate());
+    }
+
+    private void addAThirdWidgetWithZEqualNegative5() throws Exception {
+        WidgetRequest widgetRequestWithNoZ = aValidWidgetRequest().z(-5L);
+
+        // When
+        ResultActions result = mockMvc
+                .perform(
+                        post("/widgets")
+                                .content(objectMapper.writeValueAsString(widgetRequestWithNoZ))
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
+
+        String responseString = result.andReturn().getResponse().getContentAsString();
+        savedWidgets.add(objectMapper.readValue(responseString, Widget.class));
     }
 }

@@ -47,7 +47,7 @@ public interface WidgetsApi {
     @GetMapping(value = "/widgets",
             produces = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<List<Widget>> getAllWidgets();
+    List<Widget> getAllWidgets();
 
 
     @ApiOperation(value = "Find widget by ID", nickname = "getWidgetById", notes = "Returns a single widget", response = Widget.class, tags = {"widget",})
@@ -56,7 +56,7 @@ public interface WidgetsApi {
             @ApiResponse(code = 400, message = "Invalid ID supplied"),
             @ApiResponse(code = 404, message = "Widget not found")})
     @GetMapping(value = "/widgets/{widgetId}", produces = {"application/json"})
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     Widget getWidgetById(@ApiParam(value = "ID of widget to return", required = true) @PathVariable("widgetId") UUID widgetId);
 
     @ApiOperation(value = "Updates a widget in the store", nickname = "updateWidget", response = Widget.class, tags = {"widget",})

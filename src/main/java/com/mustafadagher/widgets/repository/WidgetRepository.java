@@ -14,4 +14,6 @@ public interface WidgetRepository {
     List<Widget> findAll();
 
     List<Widget> findAllByZGreaterThanOrEqual(Long z);
+
+    List<Widget> findAllByOrderByZAsc();
 }
