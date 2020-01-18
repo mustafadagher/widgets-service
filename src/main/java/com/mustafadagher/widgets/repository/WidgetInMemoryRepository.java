@@ -10,6 +10,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+/***
+ * An In-Memory implementation of {@link WidgetRepository} that uses {@link ConcurrentHashMap} as storage implementation.
+ *
+ * The choice of {@link ConcurrentHashMap} was mainly because it's synchronized but doesn't lock the whole map
+ * and it has methods to allow atomic changes on the map
+ */
 @Repository
 public class WidgetInMemoryRepository implements WidgetRepository {
     private final Map<UUID, Widget> storage;
