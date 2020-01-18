@@ -144,10 +144,10 @@ class WidgetsServiceTest {
         givenRepositoryReturnsThreeWidgets();
 
         // When
-        List<Widget> allWidgets = widgetsService.getAllWidgets();
+        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10);
 
         // Then
-        verify(widgetRepository).findAllByOrderByZAsc();
+        verify(widgetRepository).findAllByOrderByZAsc(0, 10);
 
         assertThat(allWidgets).hasSize(3);
     }
@@ -155,15 +155,15 @@ class WidgetsServiceTest {
     @Test
     void testGetAllWidgetsReturnsEmptyListIfEmpty() {
         // Given
-        when(widgetRepository.findAllByOrderByZAsc()).thenReturn(null);
+        when(widgetRepository.findAllByOrderByZAsc(0, 10)).thenReturn(null);
 
         // When
-        List<Widget> allWidgets = widgetsService.getAllWidgets();
+        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10);
 
         // Then
-        verify(widgetRepository).findAllByOrderByZAsc();
+        verify(widgetRepository).findAllByOrderByZAsc(0, 10);
 
-        assertThat(allWidgets).isNotNull().isEmpty();
+        assertThat(allWidgets).isEmpty();
     }
 
     @Test
@@ -245,6 +245,6 @@ class WidgetsServiceTest {
 
     private void givenRepositoryReturnsThreeWidgets() {
         List<Widget> widgetList = Arrays.asList(aValidWidget(), aValidWidget(), aValidWidget());
-        when(widgetRepository.findAllByOrderByZAsc()).thenReturn(widgetList);
+        when(widgetRepository.findAllByOrderByZAsc(0, 10)).thenReturn(widgetList);
     }
 }

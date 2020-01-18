@@ -1,21 +1,14 @@
 package com.mustafadagher.widgets.api;
 
 import com.mustafadagher.widgets.exception.WidgetNotFoundException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.time.OffsetDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import javax.validation.ConstraintViolationException;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -26,13 +19,20 @@ public class RestExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ApiError> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         //Get all errors
-        String errors = ex.getBindingResult()
+        String[] errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
-                .collect(Collectors.joining(System.lineSeparator()));
+                .toArray(String[]::new);
 
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, errors, ex);
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Request contains invalid parameters or body", ex, errors);
+        return buildResponseEntity(apiError);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity<ApiError> handleInvalidQueryParam(ConstraintViolationException ex) {
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         return buildResponseEntity(apiError);
     }
 

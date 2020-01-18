@@ -27,8 +27,8 @@ public class WidgetsApiController implements WidgetsApi {
         return widgetsService.getWidgetById(widgetId);
     }
 
-    public List<Widget> getAllWidgets() {
-        return widgetsService.getAllWidgets();
+    public List<Widget> getAllWidgets(int page, int size) {
+        return widgetsService.getAllWidgets(page, size);
     }
 
     public void deleteWidget(UUID widgetId) {

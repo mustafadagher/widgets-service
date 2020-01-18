@@ -40,8 +40,8 @@ public class WidgetsService {
         return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
     }
 
-    public List<Widget> getAllWidgets() {
-        List<Widget> allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc();
+    public List<Widget> getAllWidgets(int page, int size) {
+        List<Widget> allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc(page, size);
 
         if (allByOrderByZAsc == null)
             return Collections.emptyList();
