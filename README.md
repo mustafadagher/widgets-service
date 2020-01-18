@@ -43,6 +43,12 @@ You can access the swagger ui generated docs on `http://localhost:8080/swagger-u
 
 ## Complications Implemented
 * Pagination
+    * You can use pagination in the `GET /widgets` endpoint by passing the optional query params `page` and `size`, where `page` starts from `0` and `size` is the number of widgets in a `page`.
+    * The size of a page is defaulted to `10` if left unspecified
+    * example:
+            
+            http://localhost:8080/widgets?page=1&size=10
+        will return the `second page` of `size 10` widgets.
 * Rate limiting
     * In a real-life scenario to implement `rate limiting` with the required configurable features, I'd use a `proxy/gateway/load-balancer` tool like `Nginx`, `HAproxy` or `Zuul` in front of my services that has such features and configure my rate limiting requirements there. 
     By this, I'd take such functionality outside my application's business domain and make it easily configurable away from my application's life cycle. 
