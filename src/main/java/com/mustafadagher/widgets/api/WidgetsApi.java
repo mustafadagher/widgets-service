@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +29,7 @@ public interface WidgetsApi {
     @GetMapping(value = "/widgets",
             produces = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
-    List<Widget> getAllWidgets();
-
+    List<Widget> getAllWidgets(@RequestParam(required = false, defaultValue = "0") int page, @Max(500) @RequestParam(defaultValue = "10", required = false) int size);
 
     @GetMapping(value = "/widgets/{widgetId}", produces = {"application/json"})
     @ResponseStatus(HttpStatus.OK)

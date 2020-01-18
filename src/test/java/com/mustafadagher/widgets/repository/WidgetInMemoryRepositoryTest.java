@@ -6,8 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.validation.Valid;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,9 +32,7 @@ class WidgetInMemoryRepositoryTest {
                 .isNotNull()
                 .isEqualTo(validWidget);
 
-        assertThat(searchedWidget)
-                .isNotEmpty()
-                .containsSame(savedWidget);
+        assertThat(searchedWidget).containsSame(savedWidget);
     }
 
     @Test
@@ -76,6 +72,44 @@ class WidgetInMemoryRepositoryTest {
         assertThat(allByZGreaterThanOrEqualTwo)
                 .hasSize(2)
                 .contains(w2, w3);
+    }
+
+    @Test
+    void testPaginationReturnsAPageOfTheSpecifiedSizeWithTheLowestZ() {
+        // Given
+        Widget w1 = aValidWidget().z(1L);
+        Widget w2 = aValidWidget().z(2L).height(22.3F).width(11.7F);
+        Widget w3 = aValidWidget().z(-1L);
+
+        widgetRepository.save(w1);
+        widgetRepository.save(w2);
+        widgetRepository.save(w3);
+
+        // When
+        List<Widget> aPageOfTwo = widgetRepository.findAllByOrderByZAsc(0, 2);
+
+        assertThat(aPageOfTwo)
+                .hasSize(2)
+                .contains(w3, w1);
+    }
+
+    @Test
+    void testSecondPageWithLessElements() {
+        // Given
+        Widget w1 = aValidWidget().z(1L);
+        Widget w2 = aValidWidget().z(2L).height(22.3F).width(11.7F);
+        Widget w3 = aValidWidget().z(-1L);
+
+        widgetRepository.save(w1);
+        widgetRepository.save(w2);
+        widgetRepository.save(w3);
+
+        // When
+        List<Widget> aPageOfTwo = widgetRepository.findAllByOrderByZAsc(1, 2);
+
+        assertThat(aPageOfTwo)
+                .hasSize(1)
+                .contains(w2);
     }
 
     @Test

@@ -12,12 +12,22 @@ class ApiError {
     private final LocalDateTime timestamp;
     private final String message;
     private final String debugMessage;
+    private final String[] errors;
 
     ApiError(HttpStatus status, String message, Throwable ex) {
         this.status = status;
         this.message = message;
         this.debugMessage = ex.getLocalizedMessage();
         this.timestamp = LocalDateTime.now();
+        this.errors = null;
+    }
+
+    ApiError(HttpStatus status, String message,Throwable ex, String... errors) {
+        this.status = status;
+        this.message = message;
+        this.debugMessage = ex.getLocalizedMessage();
+        this.timestamp = LocalDateTime.now();
+        this.errors = errors;
     }
 
     public HttpStatus getStatus() {
@@ -36,4 +46,7 @@ class ApiError {
         return debugMessage;
     }
 
+    public String[] getErrors() {
+        return errors;
+    }
 }

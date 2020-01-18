@@ -26,17 +26,20 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         return new ArrayList<>(storage.values());
     }
 
-    public List<Widget> findAllByOrderByZAsc() {
-        return findAllByOrderBy(Comparator.comparing(Widget::getZ));
+    public List<Widget> findAllByOrderByZAsc(int page, int size) {
+        return findAllByOrderBy(page, size, Comparator.comparing(Widget::getZ));
     }
 
     public void deleteById(UUID widgetId) {
         storage.remove(widgetId);
     }
 
-    private List<Widget> findAllByOrderBy(Comparator<Widget> sortedBy) {
+    private List<Widget> findAllByOrderBy(int page, int size, Comparator<Widget> sortedBy) {
+        long skip = (long) page * (long) size;
         return storage.values().stream()
                 .sorted(sortedBy)
+                .skip(skip)
+                .limit(size)
                 .collect(Collectors.toList());
     }
 
@@ -59,8 +62,8 @@ public class WidgetInMemoryRepository implements WidgetRepository {
                     .y(updated.getY())
                     .z(updated.getZ())
                     .height(updated.getHeight())
-                    .width(updated.getWidth()))
-                    .lastModificationDate(OffsetDateTime.now());
+                    .width(updated.getWidth())
+                    .lastModificationDate(OffsetDateTime.now()));
         };
     }
 }

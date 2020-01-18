@@ -26,6 +26,7 @@ import static com.mustafadagher.widgets.Mocks.aValidWidgetRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -72,10 +73,9 @@ class WidgetsApiControllerTest {
         // then
         result
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", containsString("height must not be null")))
-                .andExpect(jsonPath("$.message", containsString("width must not be null")))
-                .andExpect(jsonPath("$.message", containsString("x must not be null")))
-                .andExpect(jsonPath("$.message", containsString("y must not be null")));
+                .andExpect(jsonPath("$.message", is("Request contains invalid parameters or body")))
+                .andExpect(jsonPath("$.errors",
+                        hasItems("height must not be null", "width must not be null", "x must not be null", "y must not be null")));
     }
 
     @Test
@@ -97,8 +97,8 @@ class WidgetsApiControllerTest {
         // then
         result
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", containsString("height must be greater than 0")))
-                .andExpect(jsonPath("$.message", containsString("width must be greater than 0")));
+                .andExpect(jsonPath("$.message", is("Request contains invalid parameters or body")))
+                .andExpect(jsonPath("$.errors", hasItems("height must be greater than 0", "width must be greater than 0")));
     }
 
     @Test
@@ -222,8 +222,8 @@ class WidgetsApiControllerTest {
                 .perform(get("/widgets"));
 
         // Then
-        verify(widgetsService).getAllWidgets();
-        List<Widget> savedWidgetList = new ArrayList(savedWidgets.values());
+        verify(widgetsService).getAllWidgets(anyInt(), anyInt());
+        List<Widget> savedWidgetList = new ArrayList<>(savedWidgets.values());
         MvcResult mvcResult =
                 result.andExpect(status().isOk())
                         .andExpect(jsonPath("$.*").isArray())
@@ -260,6 +260,105 @@ class WidgetsApiControllerTest {
 
     @Test
     @Order(9)
+    void testGetAllWidgetsPageZeroAndSizeTwoReturnsTwoWidgets() throws Exception {
+        //Given three widgets has been inserted earlier
+
+        // When
+        ResultActions result = mockMvc
+                .perform(get("/widgets")
+                        .param("page", "0")
+                        .param("size", "2")
+                );
+
+        // Then
+        verify(widgetsService).getAllWidgets(anyInt(), anyInt());
+        List<Widget> savedWidgetList = new ArrayList<>(savedWidgets.values());
+        MvcResult mvcResult =
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.*").isArray())
+                        .andExpect(jsonPath("$.*", hasSize(2)))
+                        .andExpect(jsonPath("$[0].id", is(savedWidgetList.get(2).getId().toString())))
+                        .andExpect(jsonPath("$[0].x", is(savedWidgetList.get(2).getX()), Long.class))
+                        .andExpect(jsonPath("$[0].y", is(savedWidgetList.get(2).getY()), Long.class))
+                        .andExpect(jsonPath("$[0].z", is(savedWidgetList.get(2).getZ()), Long.class))
+                        .andExpect(jsonPath("$[0].width", is(savedWidgetList.get(2).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[0].height", is(savedWidgetList.get(2).getHeight()), Float.class))
+                        .andExpect(jsonPath("$[1].id", is(savedWidgetList.get(0).getId().toString())))
+                        .andExpect(jsonPath("$[1].x", is(savedWidgetList.get(0).getX()), Long.class))
+                        .andExpect(jsonPath("$[1].y", is(savedWidgetList.get(0).getY()), Long.class))
+                        .andExpect(jsonPath("$[1].z", is(savedWidgetList.get(0).getZ()), Long.class))
+                        .andExpect(jsonPath("$[1].width", is(savedWidgetList.get(0).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[1].height", is(savedWidgetList.get(0).getHeight()), Float.class))
+                        .andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        List<Widget> widgets = objectMapper.readValue(responseString, new TypeReference<List<Widget>>() {
+        });
+
+        assertThat(widgets).hasSize(2);
+
+        assertThat(widgets.get(0).getLastModificationDate())
+                .isAtSameInstantAs(savedWidgetList.get(2).getLastModificationDate());
+    }
+
+    @Test
+    @Order(10)
+    void testGetAllWidgetsPageOneAndSizeTwoReturnsOneWidget() throws Exception {
+        //Given three widgets has been inserted earlier
+
+        // When
+        ResultActions result = mockMvc
+                .perform(get("/widgets")
+                        .param("page", "1")
+                        .param("size", "2")
+                );
+
+        // Then
+        verify(widgetsService).getAllWidgets(anyInt(), anyInt());
+        List<Widget> savedWidgetList = new ArrayList<>(savedWidgets.values());
+        MvcResult mvcResult =
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.*").isArray())
+                        .andExpect(jsonPath("$.*", hasSize(1)))
+                        .andExpect(jsonPath("$[0].id", is(savedWidgetList.get(1).getId().toString())))
+                        .andExpect(jsonPath("$[0].x", is(savedWidgetList.get(1).getX()), Long.class))
+                        .andExpect(jsonPath("$[0].y", is(savedWidgetList.get(1).getY()), Long.class))
+                        .andExpect(jsonPath("$[0].z", is(savedWidgetList.get(1).getZ()), Long.class))
+                        .andExpect(jsonPath("$[0].width", is(savedWidgetList.get(1).getWidth()), Float.class))
+                        .andExpect(jsonPath("$[0].height", is(savedWidgetList.get(1).getHeight()), Float.class))
+                        .andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        List<Widget> widgets = objectMapper.readValue(responseString, new TypeReference<List<Widget>>() {
+        });
+
+        assertThat(widgets).hasSize(1);
+
+        assertThat(widgets.get(0).getLastModificationDate())
+                .isAtSameInstantAs(savedWidgetList.get(1).getLastModificationDate());
+    }
+
+    @Test
+    @Order(11)
+    void testGetAllWidgetsWithSizeGreaterThan500ReturnsStatus400() throws Exception {
+        //Given three widgets has been inserted earlier
+
+        // When
+        ResultActions result = mockMvc
+                .perform(get("/widgets")
+                        .param("page", "0")
+                        .param("size", "501")
+                );
+
+        // Then
+        result
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("getAllWidgets.size: must be less than or equal to 500")));
+
+    }
+
+    @Test
+    @Order(12)
     void testWidgetWithSpecifiedIndexPushesAllWidgetsWithEqualOrHigherIndexesUpwards() throws Exception {
         // Given
         WidgetRequest request = aValidWidgetRequest().z(-1L);
@@ -284,7 +383,7 @@ class WidgetsApiControllerTest {
                 .andExpect(jsonPath("$.lastModificationDate").exists())
                 .andExpect(jsonPath("$.z", is(request.getZ()), Long.class));
 
-        List<Widget> allWidgetsAfterLastInsert = widgetsService.getAllWidgets();
+        List<Widget> allWidgetsAfterLastInsert = widgetsService.getAllWidgets(anyInt(), anyInt());
 
         allWidgetsAfterLastInsert.stream().filter(w -> w.getZ() > request.getZ()).forEach(afterWidget -> {
             Widget before = savedWidgets.get(afterWidget.getId());
@@ -296,7 +395,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(10)
+    @Order(13)
     void testDeleteWidgetByIdReturns204() throws Exception {
         // Given
         Widget[] widgets = savedWidgets.values().toArray(new Widget[0]);
@@ -315,7 +414,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(11)
+    @Order(14)
     void testDeleteWidgetByNonExistingIdReturns404() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
@@ -332,7 +431,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(12)
+    @Order(15)
     void testUpdateWidgetWillReturnsCompleteWidgetDescription() throws Exception {
         // Given
         WidgetRequest widgetRequest = new WidgetRequest().z(14L).x(2L).y(16L).height(23.4F).width(11.6F);
@@ -370,7 +469,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(12)
+    @Order(16)
     void testUpdateWidgetByNonExistingIdReturns404() throws Exception {
         // Given
         WidgetRequest widgetRequest = new WidgetRequest().z(14L).x(2L).y(16L).height(23.4F).width(11.6F);
