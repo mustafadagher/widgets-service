@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class WidgetsService {
@@ -82,8 +83,12 @@ public class WidgetsService {
     }
 
     private void incrementZIndexAndSave(Widget w) {
-        Widget updated = w.z(w.getZ() + 1)
-                .lastModificationDate(OffsetDateTime.now());
+        AtomicReference<Widget> current = new AtomicReference<>(w);
+
+        Widget updated = current
+                .updateAndGet(wi -> wi
+                        .z(w.getZ() + 1)
+                        .lastModificationDate(OffsetDateTime.now()));
 
         saveAndUpdateHighestZ(updated);
     }
