@@ -6,23 +6,23 @@ A web service (HTTP REST API) to work with widgets.
 
 Operations to be provided by the web service:
 
-● Creating a widget. Having set coordinates, z-index, width, and height, we get a complete widget description in the response.
+* Creating a widget. Having set coordinates, z-index, width, and height, we get a complete widget description in the response.
 
-    ○ The server generates the identifier.
-    ○ If a z-index is not specified, the widget moves to the foreground. If the existing z-index is specified, then the new widget shifts all widgets with the same and greater index upwards.
+    * The server generates the identifier.
+    * If a z-index is not specified, the widget moves to the foreground. If the existing z-index is specified, then the new widget shifts all widgets with the same and greater index upwards.
 
-● Getting a widget by its identifier. In the response we get a complete description of the
+* Getting a widget by its identifier. In the response we get a complete description of the
 widget.
 
-● Change widget data by its identifier. In the response we get an updated full description of the widget.
+* Change widget data by its identifier. In the response we get an updated full description of the widget.
+    
+    * You cannot change widget id.
+    * You cannot delete widget attributes.
+    * All changes to widgets must occur atomically. That is, if we change the ​XY coordinates of the widget, then we should not get an intermediate state during concurrent reading.
 
-    ○ You cannot change widget id.
-    ○ You cannot delete widget attributes.
-    ○ All changes to widgets must occur atomically. That is, if we change the ​XY coordinates of the widget, then we should not get an intermediate state during concurrent reading.
+* Deleting a widget. We can delete the widget by its identifier.
 
-● Deleting a widget. We can delete the widget by its identifier.
-
-● Getting a list of widgets. In the response we get a list of all widgets sorted by z-index,
+* Getting a list of widgets. In the response we get a list of all widgets sorted by z-index,
 from smallest to largest.
 
 ## Getting it to work
