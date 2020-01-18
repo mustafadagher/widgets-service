@@ -44,7 +44,7 @@ You can access the swagger ui generated docs on `http://localhost:8080/swagger-u
 ## Complications Implemented
 * Pagination
     * You can use pagination in the `GET /widgets` endpoint by passing the optional query params `page` and `size`, where `page` starts from `0` and `size` is the number of widgets in a `page`.
-    * The size of a page is defaulted to `10` if left unspecified
+    * The size of a page is defaulted to `10` if left unspecified, and the maximum size is set to `500`
     * example:
             
             http://localhost:8080/widgets?page=1&size=10
