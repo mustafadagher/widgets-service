@@ -225,7 +225,7 @@ class WidgetsServiceTest {
 
         // When
 
-        widgetsService.deleteWidget(widget.getId());
+        widgetsService.deleteWidgetById(widget.getId());
 
         //
         verify(widgetRepository).deleteById(widget.getId());
@@ -239,7 +239,7 @@ class WidgetsServiceTest {
 
         // When
 
-        Throwable thrown = catchThrowable(() -> widgetsService.deleteWidget(id));
+        Throwable thrown = catchThrowable(() -> widgetsService.deleteWidgetById(id));
 
         //
         assertThat(thrown).isInstanceOf(WidgetNotFoundException.class);

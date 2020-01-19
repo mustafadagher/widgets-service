@@ -33,12 +33,12 @@ public class WidgetsApiController implements WidgetsApi {
         return widgetsService.getAllWidgets(page, size, filter);
     }
 
-    public void deleteWidget(UUID widgetId) {
-        widgetsService.deleteWidget(widgetId);
+    public Widget updateWidgetById(UUID widgetId, WidgetRequest widgetRequest) {
+        return widgetsService.updateWidgetById(widgetId, widgetRequest);
     }
 
-    public Widget updateWidget(UUID widgetId, WidgetRequest widgetRequest) {
-        return widgetsService.updateWidgetById(widgetId, widgetRequest);
+    public void deleteWidgetById(UUID widgetId) {
+        widgetsService.deleteWidgetById(widgetId);
     }
 
 }

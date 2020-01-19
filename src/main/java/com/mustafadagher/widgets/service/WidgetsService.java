@@ -61,7 +61,7 @@ public class WidgetsService {
         return widgetsToReturn;
     }
 
-    public void deleteWidget(UUID widgetId) {
+    public void deleteWidgetById(UUID widgetId) {
         Optional<Widget> widget = widgetRepository.findById(widgetId);
 
         if (widget.isPresent())

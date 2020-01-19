@@ -535,7 +535,7 @@ class WidgetsApiControllerTest {
         savedWidgets.remove(id);
 
         // Then
-        verify(widgetsService).deleteWidget(id);
+        verify(widgetsService).deleteWidgetById(id);
 
         result.andExpect(status().isNoContent());
     }
@@ -551,7 +551,7 @@ class WidgetsApiControllerTest {
                 .perform(delete("/widgets/{id}", id));
 
         // Then
-        verify(widgetsService).deleteWidget(id);
+        verify(widgetsService).deleteWidgetById(id);
 
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is("No Widgets found with the specified id")));

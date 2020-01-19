@@ -22,10 +22,6 @@ public interface WidgetsApi {
     @ResponseStatus(HttpStatus.CREATED)
     Widget addWidget(@Valid @RequestBody WidgetRequest widgetRequest);
 
-    @DeleteMapping(value = "/widgets/{widgetId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteWidget(@Valid @NotNull @PathVariable("widgetId") UUID widgetId);
-
     @GetMapping(value = "/widgets",
             produces = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
@@ -44,5 +40,9 @@ public interface WidgetsApi {
             produces = {"application/json"},
             consumes = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
-    Widget updateWidget(@Valid @NotNull @PathVariable("widgetId") UUID widgetId, @Valid @RequestBody WidgetRequest widgetRequest);
+    Widget updateWidgetById(@Valid @NotNull @PathVariable("widgetId") UUID widgetId, @Valid @RequestBody WidgetRequest widgetRequest);
+
+    @DeleteMapping(value = "/widgets/{widgetId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteWidgetById(@Valid @NotNull @PathVariable("widgetId") UUID widgetId);
 }
