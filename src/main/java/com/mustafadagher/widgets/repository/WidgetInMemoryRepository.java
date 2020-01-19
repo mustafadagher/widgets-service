@@ -42,8 +42,8 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         storage.remove(widgetId);
     }
 
-    public List<Widget> findAllByAreaOrderByZAsc(int page, int size, WidgetAreaFilter filter) {
-        return findAllAreaByOrderBy(page, size, Comparator.comparing(Widget::getZ), w -> isInFilteredArea(w, filter));
+    public List<Widget> findAllByAreaOrderByZAsc(int page, int size, Predicate<Widget> filterPredicate) {
+        return findAllAreaByOrderBy(page, size, Comparator.comparing(Widget::getZ), filterPredicate);
     }
 
     public List<Widget> findAllByZGreaterThanOrEqual(Long z) {
@@ -55,21 +55,6 @@ public class WidgetInMemoryRepository implements WidgetRepository {
 
     public Optional<Widget> findById(UUID id) {
         return Optional.ofNullable(storage.get(id));
-    }
-
-    private boolean isInFilteredArea(Widget widget, WidgetAreaFilter filter) {
-        float deltaX = widget.getWidth() / 2F;
-        float deltaY = widget.getHeight() / 2F;
-
-        long widgetLeft = (long) Math.floor(widget.getX() - deltaX);
-        long widgetLow = (long) Math.floor(widget.getY() - deltaY);
-        long widgetRight = (long) Math.ceil(widget.getX() + deltaX);
-        long widgetHigh = (long) Math.ceil(widget.getY() + deltaY);
-
-        return widgetLeft >= filter.getLeftX()
-                && widgetLow >= filter.getLowerY()
-                && widgetRight <= filter.getRightX()
-                && widgetHigh <= filter.getHigherY();
     }
 
     private List<Widget> findAllAreaByOrderBy(int page, int size, Comparator<Widget> sortedBy, Predicate<Widget> filterBy) {

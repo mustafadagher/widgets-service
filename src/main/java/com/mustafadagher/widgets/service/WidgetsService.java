@@ -46,12 +46,13 @@ public class WidgetsService {
     public List<Widget> getAllWidgets(int page, int size, WidgetAreaFilter filter) {
         List<Widget> allByOrderByZAsc;
 
-        if (filter == null || !filter.isValid()) {
+        if (filter == null || filter.isNotValid()) {
             allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc(page, size);
         } else if (filter.isALineOrADot()) {
             return Collections.emptyList();
         } else {
-            allByOrderByZAsc = widgetRepository.findAllByAreaOrderByZAsc(page, size, filter);
+            IsInsideFilteredArea filterPredicate = IsInsideFilteredArea.withinArea(filter);
+            allByOrderByZAsc = widgetRepository.findAllByAreaOrderByZAsc(page, size, filterPredicate);
         }
 
         if (allByOrderByZAsc == null)

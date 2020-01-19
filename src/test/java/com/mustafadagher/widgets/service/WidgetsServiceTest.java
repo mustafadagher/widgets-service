@@ -174,13 +174,14 @@ class WidgetsServiceTest {
     void testGetAllWidgetsWithIAreaFilter() {
         // Given
         WidgetAreaFilter filter = new WidgetAreaFilter(0, 1, 2, 3);
-        givenRepositoryReturnsTwoWidgetsInArea(filter);
+        IsInsideFilteredArea isInsideFilteredArea = IsInsideFilteredArea.withinArea(filter);
+        givenRepositoryReturnsTwoWidgetsInArea(isInsideFilteredArea);
 
         // When
         List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10, filter);
 
         // Then
-        verify(widgetRepository).findAllByAreaOrderByZAsc(0, 10, filter);
+        verify(widgetRepository).findAllByAreaOrderByZAsc(0, 10, isInsideFilteredArea);
 
         assertThat(allWidgets).hasSize(2);
     }
@@ -190,12 +191,13 @@ class WidgetsServiceTest {
     void testGetAllWithAreFilterDescribesLineOrDotReturnsEmptyList(int leftX, int rightX, int lowerY, int higherY) {
         // Given
         WidgetAreaFilter filter = new WidgetAreaFilter(leftX, rightX, lowerY, higherY);
+        IsInsideFilteredArea isInsideFilteredArea = IsInsideFilteredArea.withinArea(filter);
 
         // When
         List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10, filter);
 
         // Then
-        verify(widgetRepository, never()).findAllByAreaOrderByZAsc(0, 10, filter);
+        verify(widgetRepository, never()).findAllByAreaOrderByZAsc(0, 10, isInsideFilteredArea);
         verify(widgetRepository, never()).findAllByOrderByZAsc(0, 10);
 
         assertThat(allWidgets).isEmpty();
@@ -297,9 +299,9 @@ class WidgetsServiceTest {
         when(widgetRepository.findAllByOrderByZAsc(0, 10)).thenReturn(widgetList);
     }
 
-    private void givenRepositoryReturnsTwoWidgetsInArea(WidgetAreaFilter filter) {
+    private void givenRepositoryReturnsTwoWidgetsInArea(IsInsideFilteredArea isInsideFilteredArea) {
         Widget w1 = aValidWidget();
         Widget w2 = aValidWidget();
-        when(widgetRepository.findAllByAreaOrderByZAsc(0, 10, filter)).thenReturn(Arrays.asList(w1, w2));
+        when(widgetRepository.findAllByAreaOrderByZAsc(0, 10, isInsideFilteredArea)).thenReturn(Arrays.asList(w1, w2));
     }
 }

@@ -17,6 +17,10 @@ public class WidgetAreaFilter {
         return leftX != null && rightX != null && lowerY != null && higherY != null;
     }
 
+    public boolean isNotValid() {
+        return !isValid();
+    }
+
     public boolean isALineOrADot() {
         return leftX.equals(rightX) || lowerY.equals(higherY);
     }

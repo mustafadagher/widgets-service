@@ -2,6 +2,7 @@ package com.mustafadagher.widgets.repository;
 
 import com.mustafadagher.widgets.model.Widget;
 import com.mustafadagher.widgets.model.WidgetAreaFilter;
+import com.mustafadagher.widgets.service.IsInsideFilteredArea;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -169,9 +170,10 @@ class WidgetInMemoryRepositoryTest {
         widgetRepository.save(w3);
 
         WidgetAreaFilter filter = new WidgetAreaFilter(0, 100, 0, 150);
+        IsInsideFilteredArea isInsideFilteredArea = IsInsideFilteredArea.withinArea(filter);
 
         // When
-        List<Widget> filtered = widgetRepository.findAllByAreaOrderByZAsc(0, 10, filter);
+        List<Widget> filtered = widgetRepository.findAllByAreaOrderByZAsc(0, 10, isInsideFilteredArea);
 
         // Then
         assertThat(filtered)
@@ -189,9 +191,10 @@ class WidgetInMemoryRepositoryTest {
         widgetRepository.save(w2);
 
         WidgetAreaFilter filter = new WidgetAreaFilter(3, 15, 3, 15);
+        IsInsideFilteredArea isInsideFilteredArea = IsInsideFilteredArea.withinArea(filter);
 
         // When
-        List<Widget> filtered = widgetRepository.findAllByAreaOrderByZAsc(0, 10, filter);
+        List<Widget> filtered = widgetRepository.findAllByAreaOrderByZAsc(0, 10, isInsideFilteredArea);
 
         // Then
         assertThat(filtered)
@@ -209,9 +212,10 @@ class WidgetInMemoryRepositoryTest {
         widgetRepository.save(w2);
 
         WidgetAreaFilter filter = new WidgetAreaFilter(-15, -3, -15, -3);
+        IsInsideFilteredArea isInsideFilteredArea = IsInsideFilteredArea.withinArea(filter);
 
         // When
-        List<Widget> filtered = widgetRepository.findAllByAreaOrderByZAsc(0, 10, filter);
+        List<Widget> filtered = widgetRepository.findAllByAreaOrderByZAsc(0, 10, isInsideFilteredArea);
 
         // Then
         assertThat(filtered)
