@@ -7,7 +7,6 @@ import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.repository.WidgetRepository;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -46,10 +45,13 @@ public class WidgetsService {
 
     public List<Widget> getAllWidgets(int page, int size, WidgetAreaFilter filter) {
         List<Widget> allByOrderByZAsc;
-        if (filter != null && filter.isValid()) {
-            allByOrderByZAsc = widgetRepository.findAllByAreaOrderByZAsc(page, size, filter);
-        } else {
+
+        if (filter == null || !filter.isValid()) {
             allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc(page, size);
+        } else if (filter.isALineOrADot()) {
+            return Collections.emptyList();
+        } else {
+            allByOrderByZAsc = widgetRepository.findAllByAreaOrderByZAsc(page, size, filter);
         }
 
         if (allByOrderByZAsc == null)

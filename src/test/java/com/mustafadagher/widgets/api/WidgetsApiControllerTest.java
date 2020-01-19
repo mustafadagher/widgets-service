@@ -10,6 +10,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -408,6 +410,7 @@ class WidgetsApiControllerTest {
         assertThat(widgets.get(0).getLastModificationDate())
                 .isAtSameInstantAs(savedWidgetList.get(0).getLastModificationDate());
     }
+
     @Test
     @Order(13)
     void testGetAllWidgetsWithInvalidAreaFilterReturnsAll() throws Exception {
@@ -459,8 +462,30 @@ class WidgetsApiControllerTest {
                 .isAtSameInstantAs(savedWidgetList.get(2).getLastModificationDate());
     }
 
-    @Test
     @Order(14)
+    @ParameterizedTest
+    @CsvSource({"0,0,0,150", "0,100,150,150", "0,0,0,0"})
+    void testGetAllWidgetsWithFilterThatDescribesLineOrDotReturnsEmptyList(String leftX, String rightX, String lowerY, String higherY) throws Exception {
+        //Given three widgets has been inserted earlier with (X,Y) are (50,50), (50,100) and (100,100)
+        //And Given filter missing the leftX (invalid)
+
+        // When
+        ResultActions result = mockMvc
+                .perform(get("/widgets")
+                        .queryParam("leftX", leftX)
+                        .queryParam("rightX", rightX)
+                        .queryParam("lowerY", lowerY)
+                        .queryParam("higherY", higherY)
+                );
+
+        // Then
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.*").isEmpty());
+    }
+
+    @Test
+    @Order(15)
     void testWidgetWithSpecifiedIndexPushesAllWidgetsWithEqualOrHigherIndexesUpwards() throws Exception {
         // Given
         WidgetRequest request = aValidWidgetRequest().z(-1L);
@@ -497,7 +522,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     void testDeleteWidgetByIdReturns204() throws Exception {
         // Given
         Widget[] widgets = savedWidgets.values().toArray(new Widget[0]);
@@ -516,7 +541,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(16)
+    @Order(17)
     void testDeleteWidgetByNonExistingIdReturns404() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
@@ -533,7 +558,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(17)
+    @Order(18)
     void testUpdateWidgetWillReturnsCompleteWidgetDescription() throws Exception {
         // Given
         WidgetRequest widgetRequest = new WidgetRequest().z(14L).x(2L).y(16L).height(23.4F).width(11.6F);
@@ -571,7 +596,7 @@ class WidgetsApiControllerTest {
     }
 
     @Test
-    @Order(18)
+    @Order(19)
     void testUpdateWidgetByNonExistingIdReturns404() throws Exception {
         // Given
         WidgetRequest widgetRequest = new WidgetRequest().z(14L).x(2L).y(16L).height(23.4F).width(11.6F);

@@ -7,6 +7,8 @@ import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.repository.WidgetRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -181,6 +183,22 @@ class WidgetsServiceTest {
         verify(widgetRepository).findAllByAreaOrderByZAsc(0, 10, filter);
 
         assertThat(allWidgets).hasSize(2);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,0,0,150", "0,100,150,150", "0,0,0,0"})
+    void testGetAllWithAreFilterDescribesLineOrDotReturnsEmptyList(int leftX, int rightX, int lowerY, int higherY) {
+        // Given
+        WidgetAreaFilter filter = new WidgetAreaFilter(leftX, rightX, lowerY, higherY);
+
+        // When
+        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10, filter);
+
+        // Then
+        verify(widgetRepository, never()).findAllByAreaOrderByZAsc(0, 10, filter);
+        verify(widgetRepository, never()).findAllByOrderByZAsc(0, 10);
+
+        assertThat(allWidgets).isEmpty();
     }
 
     @Test
