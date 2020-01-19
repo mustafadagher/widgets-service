@@ -49,8 +49,14 @@ You can access the swagger ui generated docs on `http://localhost:8080/swagger-u
             
             http://localhost:8080/widgets?page=1&size=10
         will return the `second page` of `size 10` widgets.
+* Filtering
+    * You can apply filtering for widgets on a specific area on `GET /widgets` endpoint by passing the optional query params `leftX`, `rightX`, `lowerY` and `higherY`
+    * example:
+    
+            http://localhost:8080/widgets?leftX=0&rightX=100&lowerY=0&higherY=150
+
 * Rate limiting
     * In a real-life scenario to implement `rate limiting` with the required configurable features, I'd use a `proxy/gateway/load-balancer` tool like `Nginx`, `HAproxy` or `Zuul` in front of my services that has such features and configure my rate limiting requirements there. 
     By this, I'd take such functionality outside my application's business domain and make it easily configurable away from my application's life cycle. 
     
-    * I could've used something like `guava`'s `RateLimitter` or `bucket4j` to implement a basic rate limiter on the controller level, but I thould delivering it as configurable as desired would be an over kill.
+    * I could've used something like `guava`'s `RateLimitter` or `bucket4j` to implement a basic rate limiter on the controller level, but I thought delivering it as configurable as desired would be an over kill.

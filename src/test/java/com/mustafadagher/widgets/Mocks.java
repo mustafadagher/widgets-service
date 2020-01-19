@@ -10,15 +10,15 @@ public class Mocks {
 
     public static WidgetRequest aValidWidgetRequest() {
         return new WidgetRequest()
-                .height(1.5F).width(1.5F)
-                .x(0L).y(0L).z(-1L);
+                .height(100F).width(100F)
+                .x(50L).y(50L).z(-1L);
     }
 
     public static Widget aValidWidget() {
         return new Widget()
                 .id(UUID.randomUUID())
                 .lastModificationDate(OffsetDateTime.now())
-                .height(1.5F).width(1.5F)
-                .x(0L).y(0L).z(-1L);
+                .height(100F).width(100F)
+                .x(50L).y(50L).z(-1L);
     }
 }

@@ -2,6 +2,7 @@ package com.mustafadagher.widgets.service;
 
 import com.mustafadagher.widgets.exception.WidgetNotFoundException;
 import com.mustafadagher.widgets.model.Widget;
+import com.mustafadagher.widgets.model.WidgetAreaFilter;
 import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.repository.WidgetRepository;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.mustafadagher.widgets.model.Widget.mapToWidget;
 
 @Service
 public class WidgetsService {
@@ -41,8 +44,13 @@ public class WidgetsService {
         return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
     }
 
-    public List<Widget> getAllWidgets(int page, int size) {
-        List<Widget> allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc(page, size);
+    public List<Widget> getAllWidgets(int page, int size, WidgetAreaFilter filter) {
+        List<Widget> allByOrderByZAsc;
+        if (filter != null && filter.isValid()) {
+            allByOrderByZAsc = widgetRepository.findAllByAreaOrderByZAsc(page, size, filter);
+        } else {
+            allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc(page, size);
+        }
 
         if (allByOrderByZAsc == null)
             return Collections.emptyList();
@@ -73,13 +81,17 @@ public class WidgetsService {
     }
 
     private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widgetToBeInserted) {
-        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(widgetToBeInserted.getZ());
-        if (allByZGreaterThanOrEqual != null && !allByZGreaterThanOrEqual.isEmpty()) {
-            Widget existingWidgetWithLowestZ = allByZGreaterThanOrEqual.get(0);
-
-            if (existingWidgetWithLowestZ.getZ().equals(widgetToBeInserted.getZ()))
-                allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
+        Long insertedZIndex = widgetToBeInserted.getZ();
+        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(insertedZIndex);
+        if (hasAWidgetWithZIndexEqualTo(allByZGreaterThanOrEqual, insertedZIndex)) {
+            allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
         }
+    }
+
+    private boolean hasAWidgetWithZIndexEqualTo(List<Widget> allByZGreaterThanOrEqual, Long zIndex) {
+        return allByZGreaterThanOrEqual != null
+                && !allByZGreaterThanOrEqual.isEmpty()
+                && allByZGreaterThanOrEqual.get(0).getZ().equals(zIndex);
     }
 
     private void incrementZIndexAndSave(Widget w) {
@@ -108,16 +120,5 @@ public class WidgetsService {
         if (currentHighestZ < saved.getZ()) {
             highestZ.compareAndSet(currentHighestZ, saved.getZ());
         }
-    }
-
-    private Widget mapToWidget(@Valid WidgetRequest widgetRequest) {
-        return new Widget()
-                .id(UUID.randomUUID())
-                .lastModificationDate(OffsetDateTime.now())
-                .x(widgetRequest.getX())
-                .y(widgetRequest.getY())
-                .z(widgetRequest.getZ())
-                .height(widgetRequest.getHeight())
-                .width(widgetRequest.getWidth());
     }
 }

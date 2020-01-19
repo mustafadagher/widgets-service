@@ -29,7 +29,12 @@ public interface WidgetsApi {
     @GetMapping(value = "/widgets",
             produces = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
-    List<Widget> getAllWidgets(@RequestParam(required = false, defaultValue = "0") int page, @Max(500) @RequestParam(defaultValue = "10", required = false) int size);
+    List<Widget> getAllWidgets(@RequestParam(defaultValue = "0") int page,
+                               @Max(500) @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(required = false) Integer leftX,
+                               @RequestParam(required = false) Integer rightX,
+                               @RequestParam(required = false) Integer lowerY,
+                               @RequestParam(required = false) Integer higherY);
 
     @GetMapping(value = "/widgets/{widgetId}", produces = {"application/json"})
     @ResponseStatus(HttpStatus.OK)
