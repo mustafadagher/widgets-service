@@ -7,12 +7,21 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public class Widget {
+    @Valid
     private UUID id;
+    @NotNull
     private Long x;
+    @NotNull
     private Long y;
     private Long z;
+    @NotNull
+    @DecimalMin(value = "0", inclusive = false)
     private Float width;
+    @NotNull
+    @Valid
+    @DecimalMin(value = "0", inclusive = false)
     private Float height;
+    @Valid
     private OffsetDateTime lastModificationDate;
 
     public Widget id(UUID id) {
@@ -20,13 +29,8 @@ public class Widget {
         return this;
     }
 
-    @Valid
     public UUID getId() {
         return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public Widget x(Long x) {
@@ -34,13 +38,8 @@ public class Widget {
         return this;
     }
 
-    @NotNull
     public Long getX() {
         return x;
-    }
-
-    public void setX(Long x) {
-        this.x = x;
     }
 
     public Widget y(Long y) {
@@ -48,13 +47,8 @@ public class Widget {
         return this;
     }
 
-    @NotNull
     public Long getY() {
         return y;
-    }
-
-    public void setY(Long y) {
-        this.y = y;
     }
 
     public Widget z(Long z) {
@@ -66,23 +60,13 @@ public class Widget {
         return z;
     }
 
-    public void setZ(Long z) {
-        this.z = z;
-    }
-
     public Widget width(Float width) {
         this.width = width;
         return this;
     }
 
-    @NotNull
-    @DecimalMin(value = "0", inclusive = false)
     public Float getWidth() {
         return width;
-    }
-
-    public void setWidth(Float width) {
-        this.width = width;
     }
 
     public Widget height(Float height) {
@@ -90,15 +74,9 @@ public class Widget {
         return this;
     }
 
-    @NotNull
-    @Valid
-    @DecimalMin(value = "0", inclusive = false)
+
     public Float getHeight() {
         return height;
-    }
-
-    public void setHeight(Float height) {
-        this.height = height;
     }
 
     public Widget lastModificationDate(OffsetDateTime lastModificationDate) {
@@ -106,14 +84,8 @@ public class Widget {
         return this;
     }
 
-
-    @Valid
     public OffsetDateTime getLastModificationDate() {
         return lastModificationDate;
-    }
-
-    public void setLastModificationDate(OffsetDateTime lastModificationDate) {
-        this.lastModificationDate = lastModificationDate;
     }
 
     public static Widget mapToWidget(@Valid WidgetRequest widgetRequest) {

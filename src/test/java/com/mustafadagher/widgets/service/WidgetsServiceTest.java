@@ -91,7 +91,7 @@ class WidgetsServiceTest {
         insertThreeWidgetsWithZIndexOneTwoAndThree(aValidRequest);
 
         // When
-        aValidRequest.setZ(null);
+        aValidRequest.z(null);
         Widget response = widgetsService.addWidget(aValidRequest);
 
         //  Then
@@ -110,7 +110,7 @@ class WidgetsServiceTest {
         when(widgetRepository.findAllByZGreaterThanOrEqual(2L)).thenReturn(Arrays.asList(w1, w2));
 
         // When
-        aValidRequest.setZ(2L);
+        aValidRequest.z(2L);
         Widget response = widgetsService.addWidget(aValidRequest);
 
         // then
@@ -264,13 +264,13 @@ class WidgetsServiceTest {
     }
 
     private void insertThreeWidgetsWithZIndexOneTwoAndThree(WidgetRequest aValidRequest) {
-        aValidRequest.setZ(1L);
+        aValidRequest.z(1L);
         widgetsService.addWidget(aValidRequest);
 
-        aValidRequest.setZ(2L);
+        aValidRequest.z(2L);
         widgetsService.addWidget(aValidRequest);
 
-        aValidRequest.setZ(3L);
+        aValidRequest.z(3L);
         widgetsService.addWidget(aValidRequest);
     }
 

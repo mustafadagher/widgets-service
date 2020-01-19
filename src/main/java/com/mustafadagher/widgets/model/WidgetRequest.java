@@ -5,10 +5,16 @@ import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 public class WidgetRequest {
+    @NotNull
     private Long x;
+    @NotNull
     private Long y;
     private Long z;
+    @NotNull
+    @DecimalMin(value = "0", inclusive = false)
     private Float width;
+    @NotNull
+    @DecimalMin(value = "0", inclusive = false)
     private Float height;
 
     public WidgetRequest x(Long x) {
@@ -16,14 +22,8 @@ public class WidgetRequest {
         return this;
     }
 
-
-    @NotNull
     public Long getX() {
         return x;
-    }
-
-    public void setX(Long x) {
-        this.x = x;
     }
 
     public WidgetRequest y(Long y) {
@@ -31,14 +31,8 @@ public class WidgetRequest {
         return this;
     }
 
-
-    @NotNull
     public Long getY() {
         return y;
-    }
-
-    public void setY(Long y) {
-        this.y = y;
     }
 
     public WidgetRequest z(Long z) {
@@ -50,24 +44,13 @@ public class WidgetRequest {
         return z;
     }
 
-    public void setZ(Long z) {
-        this.z = z;
-    }
-
     public WidgetRequest width(Float width) {
         this.width = width;
         return this;
     }
 
-
-    @NotNull
-    @DecimalMin(value = "0", inclusive = false)
     public Float getWidth() {
         return width;
-    }
-
-    public void setWidth(Float width) {
-        this.width = width;
     }
 
     public WidgetRequest height(Float height) {
@@ -75,16 +58,9 @@ public class WidgetRequest {
         return this;
     }
 
-    @NotNull
-    @DecimalMin(value = "0", inclusive = false)
     public Float getHeight() {
         return height;
     }
-
-    public void setHeight(Float height) {
-        this.height = height;
-    }
-
 
     @Override
     public boolean equals(java.lang.Object o) {
