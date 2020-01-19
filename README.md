@@ -60,3 +60,11 @@ You can access the swagger ui generated docs on `http://localhost:8080/swagger-u
     By this, I'd take such functionality outside my application's business domain and make it easily configurable away from my application's life cycle. 
     
     * I could've used something like `guava`'s `RateLimitter` or `bucket4j` to implement a basic rate limiter on the controller level, but I thought delivering it as configurable as desired would be an over kill.
+
+## Technical comments:
+* In-Memory Store Implementation:
+    * I choose to use `ConcurrentHashMap` as storage implementation. The choice of `ConcurrentHashMap` was mainly because it's synchronized but does not lock the whole map and it has methods to allow atomic changes on the map
+* Integration tests:
+    * I choose to use Spring's `MockMvc` to implement my integration tests for this project for simplicity, in a real-life scenario I'd rather prefer to write my integration tests in a `BDD` framework like `Cucumber`.
+    * I kept order on each method because some of the integration test methods are dependant on the result of previous ones.
+      I know having test methods that are dependant on one another isn't a best practice, but I kept it this way here just because it was easier at the moment

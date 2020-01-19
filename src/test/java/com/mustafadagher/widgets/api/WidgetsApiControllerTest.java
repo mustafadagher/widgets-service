@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Integration tests for the controller end-points
  *
  * I kept order on each method because some of the integration test methods are dependant on the result of previous ones.
- * I having test methods that are dependant on one another isn't a best practice,
+ * I know having test methods that are dependant on one another isn't a best practice,
  * but I kept it this way here just because it was easier in the moment
  */
 @SpringBootTest
