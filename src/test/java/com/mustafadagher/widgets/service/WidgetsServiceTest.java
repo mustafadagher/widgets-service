@@ -2,6 +2,7 @@ package com.mustafadagher.widgets.service;
 
 import com.mustafadagher.widgets.exception.WidgetNotFoundException;
 import com.mustafadagher.widgets.model.Widget;
+import com.mustafadagher.widgets.model.WidgetAreaFilter;
 import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.repository.WidgetRepository;
 import org.junit.jupiter.api.Test;
@@ -144,7 +145,7 @@ class WidgetsServiceTest {
         givenRepositoryReturnsThreeWidgets();
 
         // When
-        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10);
+        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10, null);
 
         // Then
         verify(widgetRepository).findAllByOrderByZAsc(0, 10);
@@ -153,12 +154,42 @@ class WidgetsServiceTest {
     }
 
     @Test
+    void testGetAllWidgetsWithInvalidAreaFilterReturnsAll() {
+        // Given
+        givenRepositoryReturnsThreeWidgets();
+        WidgetAreaFilter filter = new WidgetAreaFilter(null, 1, 2, 3);
+
+        // When
+        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10, filter);
+
+        // Then
+        verify(widgetRepository).findAllByOrderByZAsc(0, 10);
+
+        assertThat(allWidgets).hasSize(3);
+    }
+
+    @Test
+    void testGetAllWidgetsWithIAreaFilter() {
+        // Given
+        WidgetAreaFilter filter = new WidgetAreaFilter(0, 1, 2, 3);
+        givenRepositoryReturnsTwoWidgetsInArea(filter);
+
+        // When
+        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10, filter);
+
+        // Then
+        verify(widgetRepository).findAllByAreaOrderByZAsc(0, 10, filter);
+
+        assertThat(allWidgets).hasSize(2);
+    }
+
+    @Test
     void testGetAllWidgetsReturnsEmptyListIfEmpty() {
         // Given
         when(widgetRepository.findAllByOrderByZAsc(0, 10)).thenReturn(null);
 
         // When
-        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10);
+        List<Widget> allWidgets = widgetsService.getAllWidgets(0, 10, null);
 
         // Then
         verify(widgetRepository).findAllByOrderByZAsc(0, 10);
@@ -246,5 +277,11 @@ class WidgetsServiceTest {
     private void givenRepositoryReturnsThreeWidgets() {
         List<Widget> widgetList = Arrays.asList(aValidWidget(), aValidWidget(), aValidWidget());
         when(widgetRepository.findAllByOrderByZAsc(0, 10)).thenReturn(widgetList);
+    }
+
+    private void givenRepositoryReturnsTwoWidgetsInArea(WidgetAreaFilter filter) {
+        Widget w1 = aValidWidget();
+        Widget w2 = aValidWidget();
+        when(widgetRepository.findAllByAreaOrderByZAsc(0, 10, filter)).thenReturn(Arrays.asList(w1, w2));
     }
 }

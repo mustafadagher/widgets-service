@@ -1,6 +1,7 @@
 package com.mustafadagher.widgets.api;
 
 import com.mustafadagher.widgets.model.Widget;
+import com.mustafadagher.widgets.model.WidgetAreaFilter;
 import com.mustafadagher.widgets.model.WidgetRequest;
 import com.mustafadagher.widgets.service.WidgetsService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,8 +28,9 @@ public class WidgetsApiController implements WidgetsApi {
         return widgetsService.getWidgetById(widgetId);
     }
 
-    public List<Widget> getAllWidgets(int page, int size) {
-        return widgetsService.getAllWidgets(page, size);
+    public List<Widget> getAllWidgets(int page, int size, Integer leftX, Integer rightX, Integer lowerY, Integer higherY) {
+        WidgetAreaFilter filter = new WidgetAreaFilter(leftX, rightX, lowerY, higherY);
+        return widgetsService.getAllWidgets(page, size, filter);
     }
 
     public void deleteWidget(UUID widgetId) {

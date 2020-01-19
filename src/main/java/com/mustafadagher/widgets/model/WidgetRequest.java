@@ -1,25 +1,14 @@
 package com.mustafadagher.widgets.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 public class WidgetRequest {
-    @JsonProperty("x")
     private Long x;
-
-    @JsonProperty("y")
     private Long y;
-
-    @JsonProperty("z")
     private Long z;
-
-    @JsonProperty("width")
     private Float width;
-
-    @JsonProperty("height")
     private Float height;
 
     public WidgetRequest x(Long x) {
@@ -116,28 +105,6 @@ public class WidgetRequest {
     @Override
     public int hashCode() {
         return Objects.hash(x, y, z, width, height);
-    }
-
-    @Override
-    public String toString() {
-        return "class WidgetRequest {\n" +
-                "    x: " + toIndentedString(x) + "\n" +
-                "    y: " + toIndentedString(y) + "\n" +
-                "    z: " + toIndentedString(z) + "\n" +
-                "    width: " + toIndentedString(width) + "\n" +
-                "    height: " + toIndentedString(height) + "\n" +
-                "}";
-    }
-
-    /**
-     * Convert the given object to string with each line indented by 4 spaces
-     * (except the first line).
-     */
-    private String toIndentedString(java.lang.Object o) {
-        if (o == null) {
-            return "null";
-        }
-        return o.toString().replace("\n", "\n    ");
     }
 }
 

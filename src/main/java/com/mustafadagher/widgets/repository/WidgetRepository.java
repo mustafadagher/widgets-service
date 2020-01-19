@@ -1,6 +1,7 @@
 package com.mustafadagher.widgets.repository;
 
 import com.mustafadagher.widgets.model.Widget;
+import com.mustafadagher.widgets.model.WidgetAreaFilter;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,4 +19,6 @@ public interface WidgetRepository {
     List<Widget> findAllByOrderByZAsc(int page, int size);
 
     void deleteById(UUID widgetId);
+
+    List<Widget> findAllByAreaOrderByZAsc(int page, int size, WidgetAreaFilter filter);
 }

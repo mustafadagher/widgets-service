@@ -1,6 +1,7 @@
 package com.mustafadagher.widgets.repository;
 
 import com.mustafadagher.widgets.model.Widget;
+import com.mustafadagher.widgets.model.WidgetAreaFilter;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
@@ -8,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /***
@@ -40,13 +42,8 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         storage.remove(widgetId);
     }
 
-    private List<Widget> findAllByOrderBy(int page, int size, Comparator<Widget> sortedBy) {
-        long skip = (long) page * (long) size;
-        return storage.values().stream()
-                .sorted(sortedBy)
-                .skip(skip)
-                .limit(size)
-                .collect(Collectors.toList());
+    public List<Widget> findAllByAreaOrderByZAsc(int page, int size, WidgetAreaFilter filter) {
+        return findAllAreaByOrderBy(page, size, Comparator.comparing(Widget::getZ), w -> isInFilteredArea(w, filter));
     }
 
     public List<Widget> findAllByZGreaterThanOrEqual(Long z) {
@@ -58,6 +55,35 @@ public class WidgetInMemoryRepository implements WidgetRepository {
 
     public Optional<Widget> findById(UUID id) {
         return Optional.ofNullable(storage.get(id));
+    }
+
+    private boolean isInFilteredArea(Widget widget, WidgetAreaFilter filter) {
+        float deltaX = widget.getWidth() / 2F;
+        float deltaY = widget.getHeight() / 2F;
+
+        long widgetLeft = (long) Math.floor(widget.getX() - deltaX);
+        long widgetLow = (long) Math.floor(widget.getY() - deltaY);
+        long widgetRight = (long) Math.ceil(widget.getX() + deltaX);
+        long widgetHigh = (long) Math.ceil(widget.getY() + deltaY);
+
+        return widgetLeft >= filter.getLeftX()
+                && widgetLow >= filter.getLowerY()
+                && widgetRight <= filter.getRightX()
+                && widgetHigh <= filter.getHigherY();
+    }
+
+    private List<Widget> findAllAreaByOrderBy(int page, int size, Comparator<Widget> sortedBy, Predicate<Widget> filterBy) {
+        long skip = (long) page * (long) size;
+        return storage.values().stream()
+                .filter(filterBy)
+                .sorted(sortedBy)
+                .skip(skip)
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    private List<Widget> findAllByOrderBy(int page, int size, Comparator<Widget> sortedBy) {
+        return findAllAreaByOrderBy(page, size, sortedBy, Objects::nonNull);
     }
 
     private BiFunction<Widget, Widget, Widget> updateWidgetDescriptionFn() {
