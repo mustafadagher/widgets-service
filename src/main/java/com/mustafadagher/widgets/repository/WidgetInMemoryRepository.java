@@ -1,7 +1,6 @@
 package com.mustafadagher.widgets.repository;
 
 import com.mustafadagher.widgets.model.Widget;
-import com.mustafadagher.widgets.model.WidgetAreaFilter;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;

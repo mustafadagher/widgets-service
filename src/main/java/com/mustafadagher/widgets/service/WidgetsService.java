@@ -44,21 +44,21 @@ public class WidgetsService {
     }
 
     public List<Widget> getAllWidgets(int page, int size, WidgetAreaFilter filter) {
-        List<Widget> allByOrderByZAsc;
+        List<Widget> widgetsToReturn;
 
         if (filter == null || filter.isNotValid()) {
-            allByOrderByZAsc = widgetRepository.findAllByOrderByZAsc(page, size);
+            widgetsToReturn = widgetRepository.findAllByOrderByZAsc(page, size);
         } else if (filter.isALineOrADot()) {
             return Collections.emptyList();
         } else {
             IsInsideFilteredArea filterPredicate = IsInsideFilteredArea.withinArea(filter);
-            allByOrderByZAsc = widgetRepository.findAllByAreaOrderByZAsc(page, size, filterPredicate);
+            widgetsToReturn = widgetRepository.findAllByAreaOrderByZAsc(page, size, filterPredicate);
         }
 
-        if (allByOrderByZAsc == null)
+        if (widgetsToReturn == null)
             return Collections.emptyList();
 
-        return allByOrderByZAsc;
+        return widgetsToReturn;
     }
 
     public void deleteWidget(UUID widgetId) {

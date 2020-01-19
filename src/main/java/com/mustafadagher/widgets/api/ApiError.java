@@ -1,17 +1,22 @@
 package com.mustafadagher.widgets.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+
 class ApiError {
 
     private final HttpStatus status;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+    @JsonFormat(shape = STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private final LocalDateTime timestamp;
     private final String message;
     private final String debugMessage;
+    @JsonInclude(NON_EMPTY)
     private final String[] errors;
 
     ApiError(HttpStatus status, String message, Throwable ex) {
@@ -22,7 +27,7 @@ class ApiError {
         this.errors = null;
     }
 
-    ApiError(HttpStatus status, String message,Throwable ex, String... errors) {
+    ApiError(HttpStatus status, String message, Throwable ex, String... errors) {
         this.status = status;
         this.message = message;
         this.debugMessage = ex.getLocalizedMessage();
