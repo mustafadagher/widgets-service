@@ -89,10 +89,9 @@ class WidgetsApiControllerTest {
     @Test
     @Order(3)
     void testWidgetWidthAndHeightMustBeGreaterThanZero() throws Exception {
-        // Given invalid widgetRequest (all required values are nulls)
+        // Given invalid widgetRequest (height and width are Zeros)
         WidgetRequest widgetRequest = aValidWidgetRequest();
-        widgetRequest.setHeight(0f);
-        widgetRequest.setWidth(0f);
+        widgetRequest.height(0f).width(0f);
 
         // When
         ResultActions result = mockMvc
