@@ -118,9 +118,14 @@ public class WidgetsService {
     }
 
     private void updateHighestZ(Widget saved) {
-        long currentHighestZ = highestZ.get();
-        if (currentHighestZ < saved.getZ()) {
-            highestZ.compareAndSet(currentHighestZ, saved.getZ());
-        }
+        boolean updateDone;
+        do {
+            long currentHighestZ = highestZ.get();
+            if (currentHighestZ < saved.getZ()) {
+                updateDone = highestZ.compareAndSet(currentHighestZ, saved.getZ());
+            } else {
+                updateDone = true;
+            }
+        } while (!updateDone);
     }
 }
