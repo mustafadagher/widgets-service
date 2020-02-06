@@ -88,7 +88,7 @@ public class Widget {
         return lastModificationDate;
     }
 
-    public static Widget mapToWidget(@Valid WidgetRequest widgetRequest) {
+    public static Widget fromWidgetRequest(WidgetRequest widgetRequest) {
         return new Widget()
                 .id(UUID.randomUUID())
                 .lastModificationDate(OffsetDateTime.now())

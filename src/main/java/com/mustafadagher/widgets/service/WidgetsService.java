@@ -10,25 +10,24 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.mustafadagher.widgets.model.Widget.mapToWidget;
+import static com.mustafadagher.widgets.model.Widget.fromWidgetRequest;
 
 @Service
 public class WidgetsService {
     private final WidgetRepository widgetRepository;
-
-    private AtomicLong highestZ = new AtomicLong(Long.MIN_VALUE);
+    private AtomicLong highestZ;
 
     public WidgetsService(WidgetRepository widgetRepository) {
         this.widgetRepository = widgetRepository;
+        highestZ = new AtomicLong(Long.MIN_VALUE);
     }
 
     public Widget addWidget(WidgetRequest widgetRequest) {
-        Widget widget = mapToWidget(widgetRequest);
+        Widget widget = fromWidgetRequest(widgetRequest);
 
         if (widget.getZ() == null) {
             moveWidgetToForegroundIfZIndexNotSpecified(widget);
@@ -44,13 +43,11 @@ public class WidgetsService {
     }
 
     public List<Widget> getAllWidgets(int page, int size, WidgetAreaFilter filter) {
-        List<Widget> widgetsToReturn;
+        List<Widget> widgetsToReturn = null;
 
         if (filter == null || filter.isNotValid()) {
             widgetsToReturn = widgetRepository.findAllByOrderByZAsc(page, size);
-        } else if (filter.isALineOrADot()) {
-            return Collections.emptyList();
-        } else {
+        } else if (filter.isNotALineNorADot()) {
             IsInsideFilteredArea filterPredicate = IsInsideFilteredArea.withinArea(filter);
             widgetsToReturn = widgetRepository.findAllByAreaOrderByZAsc(page, size, filterPredicate);
         }
@@ -62,25 +59,27 @@ public class WidgetsService {
     }
 
     public void deleteWidgetById(UUID widgetId) {
-        Optional<Widget> widget = widgetRepository.findById(widgetId);
+        Widget widget = widgetRepository
+                .findById(widgetId)
+                .orElseThrow(WidgetNotFoundException::new);
 
-        if (widget.isPresent())
-            widgetRepository.deleteById(widgetId);
-        else
-            throw new WidgetNotFoundException();
+        widgetRepository.deleteById(widget.getId());
     }
 
     public Widget updateWidgetById(UUID id, WidgetRequest widgetRequest) {
-        Widget current = widgetRepository.findById(id).orElseThrow(WidgetNotFoundException::new);
+        Widget current = widgetRepository
+                .findById(id)
+                .orElseThrow(WidgetNotFoundException::new);
 
-        Widget updated = mapToWidget(widgetRequest);
-        updated.id(current.getId()).lastModificationDate(OffsetDateTime.now());
+        Widget updated = fromWidgetRequest(widgetRequest)
+                .id(current.getId())
+                .lastModificationDate(OffsetDateTime.now());
 
         return saveAndUpdateHighestZ(updated);
     }
 
-    AtomicLong getHighestZIndex() {
-        return highestZ;
+    long getHighestZIndex() {
+        return highestZ.get();
     }
 
     private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widgetToBeInserted) {

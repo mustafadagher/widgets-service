@@ -69,7 +69,7 @@ class WidgetsServiceTest {
         //  Given
         WidgetRequest aValidRequest = aValidWidgetRequest().z(null);
         when(widgetRepository.save(any())).then(returnsFirstArg());
-        long highestZIndexValueBeforeInsert = widgetsService.getHighestZIndex().get();
+        long highestZIndexValueBeforeInsert = widgetsService.getHighestZIndex();
 
         // When
         Widget response = widgetsService.addWidget(aValidRequest);
@@ -98,7 +98,7 @@ class WidgetsServiceTest {
 
         //  Then
         assertThat(response.getZ()).isEqualTo(4);
-        assertThat(widgetsService.getHighestZIndex().get()).isEqualTo(response.getZ());
+        assertThat(widgetsService.getHighestZIndex()).isEqualTo(response.getZ());
     }
 
     @Test
