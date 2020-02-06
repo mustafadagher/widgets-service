@@ -118,16 +118,20 @@ public class WidgetsService {
     }
 
     private void updateHighestZ(Widget saved) {
-        // FIXME the loop can result in an infinite iterations here if there are too many threads affecting the current value,
-        //  I should try to find a solution for this, maybe a max number of trials can be sufficient
+        // The loop can result in an infinite iterations here if there are too many threads affecting the current value
+        // A max number of trials is a work around to overcome an infinite loop
+        int numberOfUpdateTrials = 0;
+        int maxNumberOfUpdateTrials = 3;
+
         boolean updateDone;
         do {
             long currentHighestZ = highestZ.get();
             if (currentHighestZ < saved.getZ()) {
                 updateDone = highestZ.compareAndSet(currentHighestZ, saved.getZ());
+                numberOfUpdateTrials++;
             } else {
                 updateDone = true;
             }
-        } while (!updateDone);
+        } while (!updateDone && numberOfUpdateTrials < maxNumberOfUpdateTrials);
     }
 }
