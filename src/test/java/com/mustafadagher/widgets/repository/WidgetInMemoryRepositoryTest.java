@@ -115,7 +115,7 @@ class WidgetInMemoryRepositoryTest {
     }
 
     @Test
-    void testUpdateAnExistingWidgetKeepsTheSameCount() {
+    void testUpdateAnExistingWidgetKeepsTheSameCount() throws InterruptedException {
         // Given
         Widget w1 = aValidWidget().z(1L);
         Widget w2 = aValidWidget().z(2L).height(22.3F).width(11.7F);
@@ -124,6 +124,8 @@ class WidgetInMemoryRepositoryTest {
         widgetRepository.save(w1);
         widgetRepository.save(w2);
         widgetRepository.save(w3);
+
+        Thread.sleep(10L); // Sleep to make sure last modification date will be different in CI pipeline
 
         // When
         w1.z(2L).height(14F);
