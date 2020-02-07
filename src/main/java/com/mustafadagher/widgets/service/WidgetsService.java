@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static com.mustafadagher.widgets.model.Widget.fromWidgetRequest;
 
@@ -20,9 +21,11 @@ import static com.mustafadagher.widgets.model.Widget.fromWidgetRequest;
 public class WidgetsService {
     private final WidgetRepository widgetRepository;
     private AtomicLong highestZ;
+    private final ReentrantReadWriteLock lock;
 
     public WidgetsService(WidgetRepository widgetRepository) {
         this.widgetRepository = widgetRepository;
+        lock = new ReentrantReadWriteLock();
         highestZ = new AtomicLong(Long.MIN_VALUE);
     }
 
@@ -83,10 +86,15 @@ public class WidgetsService {
     }
 
     private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widgetToBeInserted) {
-        Long insertedZIndex = widgetToBeInserted.getZ();
-        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(insertedZIndex);
-        if (hasAWidgetWithZIndexEqualTo(allByZGreaterThanOrEqual, insertedZIndex)) {
-            allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
+        lock.writeLock().lock();
+        try {
+            Long insertedZIndex = widgetToBeInserted.getZ();
+            List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(insertedZIndex);
+            if (hasAWidgetWithZIndexEqualTo(allByZGreaterThanOrEqual, insertedZIndex)) {
+                allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
+            }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
