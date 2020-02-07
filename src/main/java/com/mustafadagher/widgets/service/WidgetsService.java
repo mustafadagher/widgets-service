@@ -108,7 +108,8 @@ public class WidgetsService {
         AtomicReference<Widget> current = new AtomicReference<>(w);
 
         Widget updated = current
-                .updateAndGet(wi -> wi
+                .updateAndGet(wi -> w
+                        .clone()
                         .z(w.getZ() + 1)
                         .lastModificationDate(OffsetDateTime.now()));
 

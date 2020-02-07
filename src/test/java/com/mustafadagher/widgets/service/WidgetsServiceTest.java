@@ -122,6 +122,7 @@ class WidgetsServiceTest {
 
         assertThat(allSavedOrUpdatedWidgets)
                 .hasSize(3)
+                .usingElementComparatorIgnoringFields("lastModificationDate")
                 .contains(response, w1.z(3L), w2.z(4L));
 
     }

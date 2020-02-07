@@ -133,9 +133,13 @@ class WidgetInMemoryRepositoryTest {
         // then
         assertThat(all)
                 .hasSize(3)
+                .usingElementComparatorIgnoringFields("lastModificationDate")
                 .contains(w1, w2, w3);
 
         assertThat(updated.getId()).isEqualTo(w1.getId());
+
+        assertThat(updated.getLastModificationDate())
+                .isAfter(w1.getLastModificationDate());
     }
 
     @Test

@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Widget {
@@ -86,6 +87,18 @@ public class Widget {
 
     public OffsetDateTime getLastModificationDate() {
         return lastModificationDate;
+    }
+
+    public Widget clone() {
+        Widget clone = new Widget();
+        clone.id(this.getId())
+                .x(this.getX())
+                .y(this.getY())
+                .z(this.getZ())
+                .width(this.getWidth())
+                .height(this.getHeight())
+                .lastModificationDate(this.getLastModificationDate());
+        return clone;
     }
 
     public static Widget fromWidgetRequest(WidgetRequest widgetRequest) {

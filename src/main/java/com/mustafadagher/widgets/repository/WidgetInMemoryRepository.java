@@ -70,12 +70,15 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         return (current, updated) -> {
             AtomicReference<Widget> currentReference = new AtomicReference<>(current);
 
-            return currentReference.updateAndGet(w -> w.x(updated.getX())
-                    .y(updated.getY())
-                    .z(updated.getZ())
-                    .height(updated.getHeight())
-                    .width(updated.getWidth())
-                    .lastModificationDate(OffsetDateTime.now()));
+            return currentReference.updateAndGet(w ->
+                    w.clone()
+                            .x(updated.getX())
+                            .y(updated.getY())
+                            .z(updated.getZ())
+                            .height(updated.getHeight())
+                            .width(updated.getWidth())
+                            .lastModificationDate(OffsetDateTime.now())
+            );
         };
     }
 }
