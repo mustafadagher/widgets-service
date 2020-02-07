@@ -10,25 +10,27 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static com.mustafadagher.widgets.model.Widget.mapToWidget;
+import static com.mustafadagher.widgets.model.Widget.fromWidgetRequest;
 
 @Service
 public class WidgetsService {
     private final WidgetRepository widgetRepository;
-
-    private AtomicLong highestZ = new AtomicLong(Long.MIN_VALUE);
+    private AtomicLong highestZ;
+    private final ReentrantReadWriteLock lock;
 
     public WidgetsService(WidgetRepository widgetRepository) {
         this.widgetRepository = widgetRepository;
+        lock = new ReentrantReadWriteLock();
+        highestZ = new AtomicLong(Long.MIN_VALUE);
     }
 
     public Widget addWidget(WidgetRequest widgetRequest) {
-        Widget widget = mapToWidget(widgetRequest);
+        Widget widget = fromWidgetRequest(widgetRequest);
 
         if (widget.getZ() == null) {
             moveWidgetToForegroundIfZIndexNotSpecified(widget);
@@ -44,13 +46,11 @@ public class WidgetsService {
     }
 
     public List<Widget> getAllWidgets(int page, int size, WidgetAreaFilter filter) {
-        List<Widget> widgetsToReturn;
+        List<Widget> widgetsToReturn = null;
 
         if (filter == null || filter.isNotValid()) {
             widgetsToReturn = widgetRepository.findAllByOrderByZAsc(page, size);
-        } else if (filter.isALineOrADot()) {
-            return Collections.emptyList();
-        } else {
+        } else if (filter.isNotALineNorADot()) {
             IsInsideFilteredArea filterPredicate = IsInsideFilteredArea.withinArea(filter);
             widgetsToReturn = widgetRepository.findAllByAreaOrderByZAsc(page, size, filterPredicate);
         }
@@ -62,32 +62,39 @@ public class WidgetsService {
     }
 
     public void deleteWidgetById(UUID widgetId) {
-        Optional<Widget> widget = widgetRepository.findById(widgetId);
+        Widget widget = widgetRepository
+                .findById(widgetId)
+                .orElseThrow(WidgetNotFoundException::new);
 
-        if (widget.isPresent())
-            widgetRepository.deleteById(widgetId);
-        else
-            throw new WidgetNotFoundException();
+        widgetRepository.deleteById(widget.getId());
     }
 
     public Widget updateWidgetById(UUID id, WidgetRequest widgetRequest) {
-        Widget current = widgetRepository.findById(id).orElseThrow(WidgetNotFoundException::new);
+        Widget current = widgetRepository
+                .findById(id)
+                .orElseThrow(WidgetNotFoundException::new);
 
-        Widget updated = mapToWidget(widgetRequest);
-        updated.id(current.getId()).lastModificationDate(OffsetDateTime.now());
+        Widget updated = fromWidgetRequest(widgetRequest)
+                .id(current.getId())
+                .lastModificationDate(OffsetDateTime.now());
 
         return saveAndUpdateHighestZ(updated);
     }
 
-    AtomicLong getHighestZIndex() {
-        return highestZ;
+    long getHighestZIndex() {
+        return highestZ.get();
     }
 
     private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widgetToBeInserted) {
-        Long insertedZIndex = widgetToBeInserted.getZ();
-        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(insertedZIndex);
-        if (hasAWidgetWithZIndexEqualTo(allByZGreaterThanOrEqual, insertedZIndex)) {
-            allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
+        lock.writeLock().lock();
+        try {
+            Long insertedZIndex = widgetToBeInserted.getZ();
+            List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(insertedZIndex);
+            if (hasAWidgetWithZIndexEqualTo(allByZGreaterThanOrEqual, insertedZIndex)) {
+                allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
+            }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
@@ -101,7 +108,8 @@ public class WidgetsService {
         AtomicReference<Widget> current = new AtomicReference<>(w);
 
         Widget updated = current
-                .updateAndGet(wi -> wi
+                .updateAndGet(wi -> w
+                        .clone()
                         .z(w.getZ() + 1)
                         .lastModificationDate(OffsetDateTime.now()));
 
@@ -119,9 +127,20 @@ public class WidgetsService {
     }
 
     private void updateHighestZ(Widget saved) {
-        long currentHighestZ = highestZ.get();
-        if (currentHighestZ < saved.getZ()) {
-            highestZ.compareAndSet(currentHighestZ, saved.getZ());
-        }
+        // The loop can result in an infinite iterations here if there are too many threads affecting the current value
+        // A max number of trials is a work around to overcome an infinite loop
+        int numberOfUpdateTrials = 0;
+        int maxNumberOfUpdateTrials = 3;
+
+        boolean updateDone;
+        do {
+            long currentHighestZ = highestZ.get();
+            if (currentHighestZ < saved.getZ()) {
+                updateDone = highestZ.compareAndSet(currentHighestZ, saved.getZ());
+                numberOfUpdateTrials++;
+            } else {
+                updateDone = true;
+            }
+        } while (!updateDone && numberOfUpdateTrials < maxNumberOfUpdateTrials);
     }
 }

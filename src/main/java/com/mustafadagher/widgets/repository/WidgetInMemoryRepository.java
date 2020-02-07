@@ -34,15 +34,11 @@ public class WidgetInMemoryRepository implements WidgetRepository {
     }
 
     public List<Widget> findAllByOrderByZAsc(int page, int size) {
-        return findAllByOrderBy(page, size, Comparator.comparing(Widget::getZ));
-    }
-
-    public void deleteById(UUID widgetId) {
-        storage.remove(widgetId);
+        return findAllByAreaOrderBy(page, size, Comparator.comparing(Widget::getZ), Objects::nonNull);
     }
 
     public List<Widget> findAllByAreaOrderByZAsc(int page, int size, Predicate<Widget> filterPredicate) {
-        return findAllAreaByOrderBy(page, size, Comparator.comparing(Widget::getZ), filterPredicate);
+        return findAllByAreaOrderBy(page, size, Comparator.comparing(Widget::getZ), filterPredicate);
     }
 
     public List<Widget> findAllByZGreaterThanOrEqual(Long z) {
@@ -56,7 +52,11 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         return Optional.ofNullable(storage.get(id));
     }
 
-    private List<Widget> findAllAreaByOrderBy(int page, int size, Comparator<Widget> sortedBy, Predicate<Widget> filterBy) {
+    public void deleteById(UUID widgetId) {
+        storage.remove(widgetId);
+    }
+
+    private List<Widget> findAllByAreaOrderBy(int page, int size, Comparator<Widget> sortedBy, Predicate<Widget> filterBy) {
         long skip = (long) page * (long) size;
         return storage.values().stream()
                 .filter(filterBy)
@@ -66,20 +66,19 @@ public class WidgetInMemoryRepository implements WidgetRepository {
                 .collect(Collectors.toList());
     }
 
-    private List<Widget> findAllByOrderBy(int page, int size, Comparator<Widget> sortedBy) {
-        return findAllAreaByOrderBy(page, size, sortedBy, Objects::nonNull);
-    }
-
     private BiFunction<Widget, Widget, Widget> updateWidgetDescriptionFn() {
         return (current, updated) -> {
             AtomicReference<Widget> currentReference = new AtomicReference<>(current);
 
-            return currentReference.updateAndGet(w -> w.x(updated.getX())
-                    .y(updated.getY())
-                    .z(updated.getZ())
-                    .height(updated.getHeight())
-                    .width(updated.getWidth())
-                    .lastModificationDate(OffsetDateTime.now()));
+            return currentReference.updateAndGet(w ->
+                    w.clone()
+                            .x(updated.getX())
+                            .y(updated.getY())
+                            .z(updated.getZ())
+                            .height(updated.getHeight())
+                            .width(updated.getWidth())
+                            .lastModificationDate(OffsetDateTime.now())
+            );
         };
     }
 }
