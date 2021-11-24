@@ -20,7 +20,7 @@ import static com.mustafadagher.widgets.model.Widget.fromWidgetRequest;
 @Service
 public class WidgetsService {
     private final WidgetRepository widgetRepository;
-    private AtomicLong highestZ;
+    private final AtomicLong highestZ;
     private final ReentrantReadWriteLock lock;
 
     public WidgetsService(WidgetRepository widgetRepository) {
@@ -31,54 +31,77 @@ public class WidgetsService {
 
     public Widget addWidget(WidgetRequest widgetRequest) {
         Widget widget = fromWidgetRequest(widgetRequest);
-
-        if (widget.getZ() == null) {
-            moveWidgetToForegroundIfZIndexNotSpecified(widget);
-        } else {
-            shiftAllWidgetsWithSameAndGreaterZIndexUpwards(widget);
+        lock.writeLock().lock();
+        try {
+            if (widget.getZ() == null) {
+                moveWidgetToForegroundIfZIndexNotSpecified(widget);
+            } else {
+                shiftAllWidgetsWithSameAndGreaterZIndexUpwards(widget);
+            }
+            return saveAndUpdateHighestZ(widget);
+        } finally {
+            lock.writeLock().unlock();
         }
-
-        return saveAndUpdateHighestZ(widget);
     }
 
     public Widget getWidgetById(UUID widgetId) {
-        return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
+        lock.readLock().lock();
+        try {
+            return widgetRepository.findById(widgetId).orElseThrow(WidgetNotFoundException::new);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public List<Widget> getAllWidgets(int page, int size, WidgetAreaFilter filter) {
-        List<Widget> widgetsToReturn = null;
+        lock.readLock().lock();
+        try {
+            List<Widget> widgetsToReturn = null;
 
-        if (filter == null || filter.isNotValid()) {
-            widgetsToReturn = widgetRepository.findAllByOrderByZAsc(page, size);
-        } else if (filter.isNotALineNorADot()) {
-            IsInsideFilteredArea filterPredicate = IsInsideFilteredArea.withinArea(filter);
-            widgetsToReturn = widgetRepository.findAllByAreaOrderByZAsc(page, size, filterPredicate);
+            if (filter == null || filter.isNotValid()) {
+                widgetsToReturn = widgetRepository.findAllByOrderByZAsc(page, size);
+            } else if (filter.isNotALineNorADot()) {
+                IsInsideFilteredArea filterPredicate = IsInsideFilteredArea.withinArea(filter);
+                widgetsToReturn = widgetRepository.findAllByAreaOrderByZAsc(page, size, filterPredicate);
+            }
+
+            if (widgetsToReturn == null)
+                return Collections.emptyList();
+
+            return widgetsToReturn;
+        } finally {
+            lock.readLock().unlock();
         }
-
-        if (widgetsToReturn == null)
-            return Collections.emptyList();
-
-        return widgetsToReturn;
     }
 
     public void deleteWidgetById(UUID widgetId) {
-        Widget widget = widgetRepository
-                .findById(widgetId)
-                .orElseThrow(WidgetNotFoundException::new);
+        lock.writeLock().lock();
+        try {
+            Widget widget = widgetRepository
+                    .findById(widgetId)
+                    .orElseThrow(WidgetNotFoundException::new);
 
-        widgetRepository.deleteById(widget.getId());
+            widgetRepository.deleteById(widget.getId());
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public Widget updateWidgetById(UUID id, WidgetRequest widgetRequest) {
-        Widget current = widgetRepository
-                .findById(id)
-                .orElseThrow(WidgetNotFoundException::new);
+        lock.writeLock().lock();
+        try {
+            Widget current = widgetRepository
+                    .findById(id)
+                    .orElseThrow(WidgetNotFoundException::new);
 
-        Widget updated = fromWidgetRequest(widgetRequest)
-                .id(current.getId())
-                .lastModificationDate(OffsetDateTime.now());
+            Widget updated = fromWidgetRequest(widgetRequest)
+                    .id(current.getId())
+                    .lastModificationDate(OffsetDateTime.now());
 
-        return saveAndUpdateHighestZ(updated);
+            return saveAndUpdateHighestZ(updated);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     long getHighestZIndex() {
@@ -86,15 +109,10 @@ public class WidgetsService {
     }
 
     private void shiftAllWidgetsWithSameAndGreaterZIndexUpwards(Widget widgetToBeInserted) {
-        lock.writeLock().lock();
-        try {
-            Long insertedZIndex = widgetToBeInserted.getZ();
-            List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(insertedZIndex);
-            if (hasAWidgetWithZIndexEqualTo(allByZGreaterThanOrEqual, insertedZIndex)) {
-                allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
-            }
-        } finally {
-            lock.writeLock().unlock();
+        Long insertedZIndex = widgetToBeInserted.getZ();
+        List<Widget> allByZGreaterThanOrEqual = widgetRepository.findAllByZGreaterThanOrEqual(insertedZIndex);
+        if (hasAWidgetWithZIndexEqualTo(allByZGreaterThanOrEqual, insertedZIndex)) {
+            allByZGreaterThanOrEqual.forEach(this::incrementZIndexAndSave);
         }
     }
 

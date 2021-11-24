@@ -2,3 +2,4 @@ target
 *.iml
 .openapi-generator
 .openapi-generator-ignore
+/.idea/
